@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>SentinelLink | Report Emergency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(15, 23, 42, 0.86);
+      --line: rgba(148, 163, 184, 0.18);
+      --text: #e5eefb;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.30), transparent 36%),
+        radial-gradient(circle at top right, rgba(34, 197, 94, 0.16), transparent 28%),
+        linear-gradient(180deg, #07111f 0%, #0b1220 100%);
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .topbar, .panel {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, var(--panel), rgba(15,23,42,0.56));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar {
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 16px;
+      z-index: 20;
+    }
+
+    .brand { display: flex; gap: 14px; align-items: center; min-width: 0; }
+    .logo {
+      width: 46px; height: 46px; border-radius: 16px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #60a5fa, #22c55e);
+      color: white; font-weight: 800; flex: 0 0 auto;
+    }
+    .brand h1 { margin: 0; font-size: 1.05rem; line-height: 1.1; }
+    .brand p, .muted { color: var(--muted); }
+    .brand p { margin: 4px 0 0; font-size: 0.88rem; }
+
+    .status { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .pill {
+      padding: 9px 13px; border-radius: 999px; border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03); color: var(--muted); font-size: 0.88rem;
+    }
+    .pill.live { color: #bbf7d0; background: rgba(34, 197, 94, 0.10); border-color: rgba(34, 197, 94, 0.24); }
+
+    .layout { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 18px; margin-top: 18px; }
+    .panel { padding: 18px; }
+    h2, h3, h4 { margin: 0; }
+    h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); letter-spacing: -0.04em; }
+    .subtitle { margin: 10px 0 0; color: var(--muted); line-height: 1.7; }
+
+    .alert-card {
+      border: 1px solid rgba(239,68,68,0.2);
+      background: rgba(239,68,68,0.08);
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 16px;
+      color: #fecaca;
+      line-height: 1.6;
+    }
+
+    form { display: grid; gap: 14px; margin-top: 16px; }
+    label { display: grid; gap: 8px; color: #cbd5e1; font-size: 0.92rem; }
+    input, select, textarea {
+      width: 100%; border: 1px solid var(--line); border-radius: 16px;
+      background: rgba(255,255,255,0.04); color: var(--text);
+      padding: 14px 16px; outline: none; font: inherit;
+    }
+    textarea { min-height: 130px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: #64748b; }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(96, 165, 250, 0.6);
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12);
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: none; border-radius: 16px; padding: 13px 16px; color: white;
+      font-weight: 700; cursor: pointer; transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.03); }
+    .btn.primary { background: linear-gradient(135deg, #ef4444, #fb7185); }
+    .btn.secondary { background: rgba(255,255,255,0.06); border: 1px solid var(--line); }
+    .btn.tertiary { background: linear-gradient(135deg, #60a5fa, #38bdf8); }
+
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px;
+      margin-top: 18px;
+    }
+    .summary {
+      border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,0.03); padding: 16px;
+    }
+    .summary strong { display: block; font-size: 1.25rem; margin-bottom: 6px; }
+    .summary span { color: var(--muted); font-size: 0.88rem; }
+
+    .timeline { display: grid; gap: 10px; margin-top: 16px; }
+    .item {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+      padding: 12px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--line);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.red { background: var(--danger); }
+    .dot.orange { background: var(--warn); }
+    .dot.green { background: var(--accent-2); }
+    .item p { margin: 4px 0 0; color: var(--muted); font-size: 0.86rem; }
+    .chip { font-size: 0.82rem; padding: 7px 10px; border-radius: 999px; border: 1px solid var(--line); color: #dbeafe; }
+
+    .map {
+      margin-top: 16px; height: 280px; border-radius: 20px; border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(15,23,42,0.26), rgba(15,23,42,0.76)),
+        radial-gradient(circle at 25% 30%, rgba(34, 197, 94, 0.18), transparent 18%),
+        radial-gradient(circle at 60% 55%, rgba(96, 165, 250, 0.18), transparent 16%),
+        radial-gradient(circle at 82% 18%, rgba(239, 68, 68, 0.20), transparent 14%),
+        #0f172a;
+      position: relative; overflow: hidden;
+    }
+    .map::before, .map::after {
+      content: ""; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(148,163,184,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,0.08) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(180deg, black, transparent 95%);
+    }
+    .pin { position: absolute; width: 16px; height: 16px; border-radius: 50%; box-shadow: 0 0 0 10px rgba(255,255,255,0.08); }
+    .pin.red { background: var(--danger); }
+    .pin.blue { background: var(--accent); }
+    .pin.green { background: var(--accent-2); }
+    .pin.orange { background: var(--warn); }
+
+    .footer { margin-top: 14px; color: var(--muted); font-size: 0.84rem; text-align: center; }
+
+    @media (max-width: 1040px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 680px) {
+      .app { padding: 12px; }
+      .topbar, .panel { border-radius: 20px; }
+      .row, .summary-grid { grid-template-columns: 1fr; }
+      .status { justify-content: flex-start; }
+      .map { height: 220px; }
+    }
+  </style>
+  <link rel="stylesheet" href="../css/style.css">
+
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="report.html">Report Incident</a>
+    <a href="map.html">Map</a>
+    <a href="analytics.html">Analytics</a>
+    <a href="settings.html">Settings</a>
+</nav>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">SL</div>
+        <div>
+          <h1>SentinelLink</h1>
+          <p>Incident reporting and location sharing</p>
+        </div>
+      </div>
+      <div class="status">
+        <span class="pill live">● SOS channel active</span>
+        <span class="pill">Nearest team: 3 km</span>
+        <span class="pill">Case ID: SL-2084</span>
+      </div>
+    </header>
+
+    <section class="layout">
+      <div class="panel">
+        <h2>Report an emergency</h2>
+        <p class="subtitle">
+          Use this screen to send a rapid SOS report with location, urgency, and context. The MVP keeps the flow
+          intentionally short so it can be used under stress.
+        </p>
+
+        <div class="alert-card">
+          For disaster and railway safety scenarios, the report is pushed directly to the command dashboard.
+          In the prototype, this can be simulated without any backend.
+        </div>
+
+        <form>
+          <div class="row">
+            <label>
+              Incident type
+              <select>
+                <option>Medical emergency</option>
+                <option>Flood / water rise</option>
+                <option>Railway hazard</option>
+                <option>Landslide risk</option>
+                <option>Fire / smoke</option>
+              </select>
+            </label>
+            <label>
+              Priority level
+              <select>
+                <option>Critical</option>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="row">
+            <label>
+              Location
+              <input type="text" placeholder="Share GPS or enter area name" />
+            </label>
+            <label>
+              Contact number
+              <input type="text" placeholder="Optional" />
+            </label>
+          </div>
+
+          <label>
+            Describe what happened
+            <textarea placeholder="Give a short, clear description of the emergency..."></textarea>
+          </label>
+
+          <div class="actions">
+            <button class="btn primary" type="button">Send SOS</button>
+            <button class="btn tertiary" type="button">Share live location</button>
+            <button class="btn secondary" type="button">Attach photo</button>
+          </div>
+        </form>
+
+        <div class="summary-grid">
+          <div class="summary"><strong>2 taps</strong><span>to send an emergency report</span></div>
+          <div class="summary"><strong>Live</strong><span>location support for responders</span></div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <h3>Response flow</h3>
+        <p class="subtitle">What happens after the SOS is sent.</p>
+
+        <div class="timeline">
+          <div class="item">
+            <span class="dot red"></span>
+            <div>
+              <strong>Incident received</strong>
+              <p>Emergency alert enters the command queue instantly.</p>
+            </div>
+            <span class="chip">Now</span>
+          </div>
+          <div class="item">
+            <span class="dot orange"></span>
+            <div>
+              <strong>Priority assigned</strong>
+              <p>The system ranks the report by risk and distance.</p>
+            </div>
+            <span class="chip">Next</span>
+          </div>
+          <div class="item">
+            <span class="dot green"></span>
+            <div>
+              <strong>Team dispatched</strong>
+              <p>Responder unit receives route and location details.</p>
+            </div>
+            <span class="chip">Soon</span>
+          </div>
+        </div>
+
+        <div class="map">
+          <div class="pin red" style="top: 24%; left: 16%;"></div>
+          <div class="pin orange" style="top: 52%; left: 34%;"></div>
+          <div class="pin blue" style="top: 38%; left: 66%;"></div>
+          <div class="pin green" style="top: 18%; left: 80%;"></div>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary"><strong>GPS</strong><span>faster location handoff</span></div>
+          <div class="summary"><strong>SMS</strong><span>backup alert pathway</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <p class="footer">SentinelLink report screen • citizen-facing emergency submission prototype</p>
+  </main>
+<script src="../js/app.js"></script>
+</body>
+</html>
