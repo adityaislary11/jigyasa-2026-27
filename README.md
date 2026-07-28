@@ -80,8 +80,8 @@ Data Handling
 
 ## 📁 Project Structure
 
+```text
 SentinelLink/
-│
 ├── pages/
 │   ├── index.html
 │   ├── login.html
@@ -106,7 +106,7 @@ SentinelLink/
 │   └── analytics.js
 │
 └── README.md
-
+```
 ---
 
 🎯 Sustainable Development Goals (SDGs)
