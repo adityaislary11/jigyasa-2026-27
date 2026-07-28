@@ -78,7 +78,7 @@ Data Handling
 
 ---
 
-📁 Project Structure
+## 📁 Project Structure
 
 SentinelLink/
 │
