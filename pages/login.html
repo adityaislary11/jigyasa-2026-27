@@ -1,14 +1,15 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0f172a" />
-  <title>SentinelLink | Login</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="#0f172a" name="theme-color"/>
+<title>SentinelLink | Login</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
     :root {
       --bg: #07111f;
       --panel: rgba(15, 23, 42, 0.86);
@@ -292,95 +293,72 @@
       .btn.primary, .btn.secondary { width: 100%; }
     }
   </style>
-  <link rel="stylesheet" href="../css/style.css">
-
+<link href="../css/style.css" rel="stylesheet"/>
 </head>
 <body>
-  <main class="shell">
-    <section class="hero">
-      <div>
-        <div class="brand">
-          <div class="logo">SL</div>
-          <div>
-            <h1>SentinelLink</h1>
-            <p>Secure access for emergency response teams and citizens</p>
-          </div>
-        </div>
-
-        <h2>Sign in to the public safety command flow.</h2>
-        <p>
+<main class="shell">
+<section class="hero">
+<div>
+<div class="brand">
+<div class="logo">SL</div>
+<div>
+<h1>SentinelLink</h1>
+<p>Secure access for emergency response teams and citizens</p>
+</div>
+</div>
+<h2>Sign in to the public safety command flow.</h2>
+<p>
           This login screen is part of the SentinelLink MVP, a public safety prototype for disaster response
           and railway safety. It supports role-based access for citizens, emergency services, and local government
           staff.
         </p>
-
-        <div class="feature-grid">
-          <div class="feature">
-            <strong>Citizen access</strong>
-            <span>Report danger, share live location, and view safety guidance.</span>
-          </div>
-          <div class="feature">
-            <strong>Authority access</strong>
-            <span>Review alerts, assign teams, and manage active incidents.</span>
-          </div>
-          <div class="feature">
-            <strong>Offline ready</strong>
-            <span>Prototype designed to continue working with minimal connectivity.</span>
-          </div>
-          <div class="feature">
-            <strong>Fast response</strong>
-            <span>Built for high-stress situations where speed matters most.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-note">Prototype login page • no backend wired yet</div>
-    </section>
-
-    <section class="form-card">
-      <div class="badge">● Protected access</div>
-      <h3>Welcome back</h3>
-      <p class="sub">Enter your details to continue to the SentinelLink dashboard.</p>
-
-      <form>
-        <label>
+<div class="feature-grid">
+<div class="feature">
+<strong>Citizen access</strong>
+<span>Report danger, share live location, and view safety guidance.</span>
+</div>
+<div class="feature">
+<strong>Authority access</strong>
+<span>Review alerts, assign teams, and manage active incidents.</span>
+</div>
+<div class="feature">
+<strong>Offline ready</strong>
+<span>Prototype designed to continue working with minimal connectivity.</span>
+</div>
+<div class="feature">
+<strong>Fast response</strong>
+<span>Built for high-stress situations where speed matters most.</span>
+</div>
+</div>
+</div>
+<div class="footer-note">Prototype login page • no backend wired yet</div>
+</section>
+<section class="form-card">
+<div class="badge">● Protected access</div>
+<h3>Welcome back</h3>
+<p class="sub">Enter your details to continue to the SentinelLink dashboard.</p>
+<form id="loginForm">
+<label>
           Email or username
-          <input type="text" placeholder="you@example.com" />
-        </label>
-
-        <label>
+          <input autocomplete="username" id="username" placeholder="Username" required="" type="text"/>
+</label>
+<label>
           Password
-          <input type="password" placeholder="Enter your password" />
-        </label>
+          <input autocomplete="current-password" id="password" placeholder="Password" required="" type="password"/>
+</label>
 
-        <div class="row">
-          <label>
-            Role
-            <input type="text" placeholder="Citizen / Responder" />
-          </label>
-          <label>
-            District code
-            <input type="text" placeholder="ND-04" />
-          </label>
-        </div>
-
-        <div class="actions">
-          <button class="btn primary" type="button">Sign in</button>
-          <button class="btn secondary" type="button">Use emergency access</button>
-        </div>
-
-        <div class="links">
-          <span>Forgot password? <a href="#">Recover access</a></span>
-          <a href="#">Create account</a>
-        </div>
-
-        <div class="alert">
-          For the MVP, this page is a front-end mockup only. Later we can connect it to Firebase, Supabase,
-          or another authentication service.
-        </div>
-      </form>
-    </section>
-  </main>
-<script src="../js/app.js"></script>
+<label><input id="rememberMe" type="checkbox"/> Remember Me</label><div class="actions">
+<button class="btn primary" type="submit">Sign in</button>
+<button class="btn secondary" type="button">Use emergency access</button>
+</div>
+<div class="links">
+<span>Forgot password? <a href="#">Recover access</a></span>
+<a href="#">Create account</a>
+</div>
+<div class="alert">Demo login: Username: admin  Password: admin123</div>
+</form>
+</section>
+</main>
+<script defer="" src="../js/app.js"></script>
 </body>
 </html>
