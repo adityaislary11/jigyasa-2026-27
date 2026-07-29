@@ -1,27 +1,19 @@
-/*
-=================================================
- SentinelLink Beta
- Main Application Controller
- Part 1 - Authentication & Session Management
-=================================================
-*/
 
+// SentinelLink Beta
+// Core Application Controller
 
-// ================================================
-// Global Configuration
-// ================================================
 
 const SentinelApp = {
 
-    version: "0.9",
-
     storageKeys: {
 
-        session: "sentinelSession",
+        users: "sentinel_users",
 
-        reports: "sentinelReports",
+        session: "sentinel_session",
 
-        settings: "sentinelSettings"
+        reports: "sentinel_reports",
+
+        settings: "sentinel_settings"
 
     }
 
@@ -29,101 +21,192 @@ const SentinelApp = {
 
 
 
-// ================================================
-// Session Management
-// ================================================
+
+
+// =============================
+// INITIAL DATABASE SETUP
+// =============================
+
+
+function initializeDatabase(){
+
+
+    if(
+        !localStorage.getItem(
+            SentinelApp.storageKeys.users
+        )
+    ){
+
+
+        const defaultUsers = [
+
+            {
+                username:"admin",
+                password:"admin123",
+                role:"Administrator"
+            }
+
+        ];
+
+
+
+        localStorage.setItem(
+
+            SentinelApp.storageKeys.users,
+
+            JSON.stringify(defaultUsers)
+
+        );
+
+
+    }
+
+
+
+
+    if(
+        !localStorage.getItem(
+            SentinelApp.storageKeys.reports
+        )
+    ){
+
+
+        localStorage.setItem(
+
+            SentinelApp.storageKeys.reports,
+
+            JSON.stringify([])
+
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// LOGIN SYSTEM
+// =============================
+
+
+function login(username,password){
+
+
+
+    const users = JSON.parse(
+
+        localStorage.getItem(
+            SentinelApp.storageKeys.users
+        )
+
+    );
+
+
+
+
+
+    const user = users.find(
+
+        u =>
+        u.username === username
+        &&
+        u.password === password
+
+    );
+
+
+
+
+
+    if(user){
+
+
+
+        const session = {
+
+
+            username:user.username,
+
+            role:user.role,
+
+            loginTime:
+            new Date().toISOString()
+
+
+        };
+
+
+
+
+        localStorage.setItem(
+
+            SentinelApp.storageKeys.session,
+
+            JSON.stringify(session)
+
+        );
+
+
+
+        return true;
+
+
+    }
+
+
+
+
+    return false;
+
+
+}
+
+
+
+
+
+
+
+
+// =============================
+// SESSION MANAGEMENT
+// =============================
 
 
 function getSession(){
 
-    const localSession =
-        localStorage.getItem(
-            SentinelApp.storageKeys.session
-        );
 
+    const session =
 
-    const temporarySession =
-        sessionStorage.getItem(
-            SentinelApp.storageKeys.session
-        );
+    localStorage.getItem(
 
-
-    return JSON.parse(
-        localSession ||
-        temporarySession ||
-        "null"
-    );
-
-}
-
-
-
-
-function saveSession(userData, remember=false){
-
-
-    const sessionData = {
-
-        username:userData.username,
-
-        role:userData.role || "Citizen",
-
-        loginTime:new Date().toISOString()
-
-    };
-
-
-
-    const storage =
-        remember
-        ? localStorage
-        : sessionStorage;
-
-
-
-    storage.setItem(
-
-        SentinelApp.storageKeys.session,
-
-        JSON.stringify(sessionData)
-
-    );
-
-
-}
-
-
-
-
-function clearSession(){
-
-
-    localStorage.removeItem(
         SentinelApp.storageKeys.session
+
     );
 
 
-    sessionStorage.removeItem(
-        SentinelApp.storageKeys.session
-    );
+
+    return session
+
+    ?
+
+    JSON.parse(session)
+
+    :
+
+    null;
 
 
 }
 
 
-
-// ================================================
-// Authentication Check
-// ================================================
-
-
-function isLoggedIn(){
-
-
-    return getSession() !== null;
-
-
-}
 
 
 
@@ -132,11 +215,17 @@ function isLoggedIn(){
 function requireLogin(){
 
 
-    if(!isLoggedIn()){
+
+    const session =
+        getSession();
+
+
+
+    if(!session){
 
 
         window.location.href =
-            "login.html";
+        "login.html";
 
 
     }
@@ -148,83 +237,74 @@ function requireLogin(){
 
 
 
-// ================================================
-// User Information
-// ================================================
 
 
-function getCurrentUser(){
+function logout(){
 
 
-    const session =
-        getSession();
+
+    localStorage.removeItem(
+
+        SentinelApp.storageKeys.session
+
+    );
 
 
-    if(session){
 
-        return session.username;
-
-    }
-
-
-    return "Guest";
+    window.location.href =
+    "login.html";
 
 
 }
 
 
 
-function getUserRole(){
 
 
-    const session =
-        getSession();
 
 
-    if(session){
+initializeDatabase();
 
-        return session.role;
+// =============================
+// REPORT MANAGEMENT
+// =============================
 
-    }
-
-
-    return null;
-
-
-}
-/*
-=================================================
- SentinelLink Beta
- Main Application Controller
- Part 2 - Reports & Statistics Management
-=================================================
-*/
-
-
-// ================================================
-// Report Database
-// ================================================
 
 
 function getReports(){
 
+
+
     const reports =
 
-        localStorage.getItem(
-            SentinelApp.storageKeys.reports
-        );
+    localStorage.getItem(
 
+        SentinelApp.storageKeys.reports
 
-    return JSON.parse(
-        reports || "[]"
     );
 
+
+
+    return reports
+
+    ?
+
+    JSON.parse(reports)
+
+    :
+
+    [];
+
 }
+
+
+
 
 
 
 
 function saveReports(reports){
+
 
 
     localStorage.setItem(
@@ -242,12 +322,14 @@ function saveReports(reports){
 
 
 
-// ================================================
-// Create New Report
-// ================================================
 
 
-function createReport(reportData){
+
+// Create new incident report
+
+
+function createReport(data){
+
 
 
     const reports =
@@ -255,58 +337,95 @@ function createReport(reportData){
 
 
 
-    const newReport = {
+
+    const report = {
+
 
 
         id:
-            "SL-" +
-            Date.now(),
+
+        "SL-" +
+
+        Date.now()
+        .toString()
+        .slice(-6),
+
+
 
 
         reporter:
-            reportData.reporter || "Anonymous",
+
+        data.reporter,
+
 
 
         contact:
-            reportData.contact || "Not provided",
+
+        data.contact,
+
 
 
         type:
-            reportData.type || "General Emergency",
+
+        data.type,
+
 
 
         priority:
-            reportData.priority || "Medium",
+
+        data.priority,
+
 
 
         location:
-            reportData.location || "Unknown",
+
+        data.location,
+
 
 
         description:
-            reportData.description || "",
+
+        data.description,
+
 
 
         status:
-            "Pending",
+
+        "Pending",
+
+
 
 
         createdAt:
-            new Date().toISOString()
+
+        new Date()
+        .toISOString()
+
 
 
     };
 
 
 
-    reports.push(newReport);
 
 
-    saveReports(reports);
+    reports.unshift(
+        report
+    );
 
 
 
-    return newReport;
+
+
+    saveReports(
+        reports
+    );
+
+
+
+
+
+    return report;
 
 
 }
@@ -315,12 +434,14 @@ function createReport(reportData){
 
 
 
-// ================================================
-// Update Report
-// ================================================
 
 
-function updateReportStatus(id, newStatus){
+
+// Latest reports
+
+
+function getLatestReports(limit=5){
+
 
 
     const reports =
@@ -328,32 +449,10 @@ function updateReportStatus(id, newStatus){
 
 
 
-    const updatedReports =
-        reports.map(report => {
-
-
-            if(report.id === id){
-
-
-                report.status =
-                    newStatus;
-
-
-            }
-
-
-            return report;
-
-
-        });
-
-
-
-    saveReports(updatedReports);
-
-
-
-    return updatedReports;
+    return reports.slice(
+        0,
+        limit
+    );
 
 
 }
@@ -362,32 +461,98 @@ function updateReportStatus(id, newStatus){
 
 
 
-// ================================================
-// Delete Report
-// ================================================
+
+
+
+// Update incident status
+
+
+function updateReportStatus(
+    id,
+    newStatus
+){
+
+
+
+    const reports =
+        getReports();
+
+
+
+
+    const report =
+        reports.find(
+
+            r => r.id === id
+
+        );
+
+
+
+
+
+    if(report){
+
+
+        report.status =
+        newStatus;
+
+
+
+        saveReports(
+            reports
+        );
+
+
+
+        return true;
+
+
+    }
+
+
+
+
+    return false;
+
+
+}
+
+
+
+
+
+
+
+
+// Delete incident
 
 
 function deleteReport(id){
 
 
-    const reports =
+
+    let reports =
         getReports();
 
 
 
-    const filteredReports =
 
-        reports.filter(
-            report =>
-            report.id !== id
-        );
+    reports =
+
+    reports.filter(
+
+        report =>
+        report.id !== id
+
+    );
 
 
 
-    saveReports(filteredReports);
 
-
-    return filteredReports;
+    saveReports(
+        reports
+    );
 
 
 }
@@ -396,52 +561,106 @@ function deleteReport(id){
 
 
 
-// ================================================
-// Report Statistics
-// ================================================
+
+
+
+// Find single report
+
+
+function getReportById(id){
+
+
+
+    const reports =
+        getReports();
+
+
+
+    return reports.find(
+
+        report =>
+        report.id === id
+
+    );
+
+
+}
+
+// =============================
+// ANALYTICS SYSTEM
+// =============================
+
 
 
 function getStatistics(){
 
 
+
     const reports =
         getReports();
+
+
+
+
+    let total =
+        reports.length;
+
+
+
+    let pending = 0;
+
+    let active = 0;
+
+    let resolved = 0;
+
+
+
+
+
+    reports.forEach(report => {
+
+
+
+        if(report.status === "Pending"){
+
+            pending++;
+
+        }
+
+
+
+        else if(report.status === "Active"){
+
+            active++;
+
+        }
+
+
+
+        else if(report.status === "Resolved"){
+
+            resolved++;
+
+        }
+
+
+
+    });
+
+
 
 
 
     return {
 
 
-        total:
+        total,
 
-            reports.length,
+        pending,
 
+        active,
 
-
-        pending:
-
-            reports.filter(
-                report =>
-                report.status === "Pending"
-            ).length,
-
-
-
-        active:
-
-            reports.filter(
-                report =>
-                report.status === "Active"
-            ).length,
-
-
-
-        resolved:
-
-            reports.filter(
-                report =>
-                report.status === "Resolved"
-            ).length
+        resolved
 
 
     };
@@ -453,12 +672,11 @@ function getStatistics(){
 
 
 
-// ================================================
-// Category Statistics
-// ================================================
+
 
 
 function getCategoryStats(){
+
 
 
     const reports =
@@ -470,10 +688,15 @@ function getCategoryStats(){
 
 
 
+
+
     reports.forEach(report => {
 
 
-        if(categories[report.type]){
+
+        if(
+            categories[report.type]
+        ){
 
 
             categories[report.type]++;
@@ -490,7 +713,10 @@ function getCategoryStats(){
         }
 
 
+
     });
+
+
 
 
 
@@ -503,12 +729,124 @@ function getCategoryStats(){
 
 
 
-// ================================================
-// Latest Reports
-// ================================================
 
 
-function getLatestReports(limit=5){
+
+
+// =============================
+// SETTINGS MANAGEMENT
+// =============================
+
+
+
+
+function saveSettings(settings){
+
+
+
+    localStorage.setItem(
+
+        SentinelApp.storageKeys.settings,
+
+        JSON.stringify(settings)
+
+    );
+
+
+}
+
+
+
+
+
+
+
+function getSettings(){
+
+
+
+    const settings =
+
+    localStorage.getItem(
+
+        SentinelApp.storageKeys.settings
+
+    );
+
+
+
+
+    return settings
+
+    ?
+
+    JSON.parse(settings)
+
+    :
+
+    {};
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =============================
+// DATABASE CONTROL
+// =============================
+
+
+
+
+function resetDatabase(){
+
+
+
+    localStorage.removeItem(
+
+        SentinelApp.storageKeys.reports
+
+    );
+
+
+
+    localStorage.removeItem(
+
+        SentinelApp.storageKeys.settings
+
+    );
+
+
+
+
+    initializeDatabase();
+
+
+}
+
+
+
+
+
+
+
+
+
+// =============================
+// EXPORT DATA
+// =============================
+
+
+
+function exportReports(){
+
 
 
     const reports =
@@ -516,349 +854,16 @@ function getLatestReports(limit=5){
 
 
 
-    return reports
 
-        .sort(
-            (a,b)=>
-            new Date(b.createdAt)
-            -
-            new Date(a.createdAt)
-        )
+    return JSON.stringify(
 
-        .slice(0,limit);
+        reports,
 
+        null,
 
-}
-/*
-=================================================
- SentinelLink Beta
- Main Application Controller
- Part 3 - UI Control & Startup
-=================================================
-*/
+        2
 
-
-// ================================================
-// Logout
-// ================================================
-
-
-function logout(){
-
-
-    clearSession();
-
-
-    window.location.href =
-        "login.html";
+    );
 
 
 }
-
-
-
-
-
-// ================================================
-// Update Homepage Statistics
-// ================================================
-
-
-function updateStatisticsUI(){
-
-
-    const stats =
-        getStatistics();
-
-
-
-    const total =
-        document.getElementById(
-            "totalReports"
-        );
-
-
-    const pending =
-        document.getElementById(
-            "pendingReports"
-        );
-
-
-    const active =
-        document.getElementById(
-            "activeReports"
-        );
-
-
-    const resolved =
-        document.getElementById(
-            "resolvedReports"
-        );
-
-
-
-    if(total){
-
-        total.textContent =
-            stats.total;
-
-    }
-
-
-    if(pending){
-
-        pending.textContent =
-            stats.pending;
-
-    }
-
-
-    if(active){
-
-        active.textContent =
-            stats.active;
-
-    }
-
-
-    if(resolved){
-
-        resolved.textContent =
-            stats.resolved;
-
-    }
-
-
-}
-
-
-
-
-
-// ================================================
-// Update User Information
-// ================================================
-
-
-function updateUserUI(){
-
-
-    const username =
-        getCurrentUser();
-
-
-
-    const userElements =
-
-        document.querySelectorAll(
-            "[data-user]"
-        );
-
-
-
-    userElements.forEach(element => {
-
-
-        element.textContent =
-            username;
-
-
-    });
-
-
-}
-
-
-
-
-
-// ================================================
-// Recent Activity
-// ================================================
-
-
-function updateRecentActivity(){
-
-
-    const container =
-        document.getElementById(
-            "recentActivity"
-        );
-
-
-
-    if(!container){
-
-        return;
-
-    }
-
-
-
-    const reports =
-        getLatestReports();
-
-
-
-    if(reports.length === 0){
-
-
-        container.innerHTML =
-        `
-        <li>
-            No incidents available.
-        </li>
-        `;
-
-
-        return;
-
-    }
-
-
-
-
-    container.innerHTML = "";
-
-
-
-    reports.forEach(report => {
-
-
-        const item =
-            document.createElement("li");
-
-
-
-        item.innerHTML =
-        `
-        <strong>
-            ${report.type}
-        </strong>
-
-        <br>
-
-        Status:
-        ${report.status}
-
-        <br>
-
-        Location:
-        ${report.location}
-
-        `;
-
-
-
-        container.appendChild(item);
-
-
-    });
-
-
-}
-
-
-
-
-
-// ================================================
-// Page Protection
-// ================================================
-
-
-function protectPages(){
-
-
-    const currentPage =
-        window.location.pathname;
-
-
-
-    const protectedPages = [
-
-        "dashboard.html",
-
-        "report.html",
-
-        "reports.html",
-
-        "analytics.html",
-
-        "settings.html",
-
-        "admin.html"
-
-    ];
-
-
-
-    protectedPages.forEach(page => {
-
-
-        if(currentPage.includes(page)){
-
-
-            requireLogin();
-
-
-        }
-
-
-    });
-
-
-}
-
-
-
-
-
-// ================================================
-// Application Startup
-// ================================================
-
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
-
-
-        protectPages();
-
-
-        updateStatisticsUI();
-
-
-        updateUserUI();
-
-
-        updateRecentActivity();
-
-
-
-    }
-);
-
-
-
-
-
-// ================================================
-// Global Error Handling
-// ================================================
-
-
-window.addEventListener(
-    "error",
-    function(event){
-
-
-        console.error(
-            "SentinelLink Error:",
-            event.error
-        );
-
-
-    }
-);
