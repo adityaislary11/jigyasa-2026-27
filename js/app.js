@@ -1,755 +1,812 @@
-/* ===========================================================
-   SentinelLink
-   app.js
-   Global Application Script
-   Part 1/5
-=========================================================== */
+/*=========================================================
+    SentinelLink Beta v2.0
+    Core Module
+=========================================================*/
 
 "use strict";
 
-/* ===========================================================
-   APPLICATION
-=========================================================== */
-
 const SentinelLink = {
+
+    version: "2.0 Beta",
 
     appName: "SentinelLink",
 
-    version: "1.0",
+    storageKeys: {
 
-    storagePrefix: "sentinellink_",
+        users: "sl_users",
+
+        reports: "sl_reports",
+
+        session: "sl_session",
+
+        settings: "sl_settings"
+
+    },
 
     currentUser: null,
 
-    currentTheme: "dark",
+    settings: {
 
-    notifications: [],
+        autoRefresh: true,
 
-    reports: [],
-
-    settings: {},
-
-    initialized: false
-
-};
-
-/* ===========================================================
-   DOM HELPERS
-=========================================================== */
-
-const $ = (selector) => document.querySelector(selector);
-
-const $$ = (selector) => document.querySelectorAll(selector);
-
-const create = (tag) => document.createElement(tag);
-
-/* ===========================================================
-   UTILITIES
-=========================================================== */
-
-function generateID(prefix = "SL"){
-
-    return prefix +
-           "-" +
-           Date.now() +
-           "-" +
-           Math.floor(Math.random()*9999);
-
-}
-
-function getCurrentDate(){
-
-    return new Date().toLocaleDateString();
-
-}
-
-function getCurrentTime(){
-
-    return new Date().toLocaleTimeString();
-
-}
-
-function getCurrentDateTime(){
-
-    return new Date().toLocaleString();
-
-}
-
-function formatDate(date){
-
-    return new Date(date).toLocaleDateString();
-
-}
-
-function formatTime(date){
-
-    return new Date(date).toLocaleTimeString();
-
-}
-
-function delay(ms){
-
-    return new Promise(resolve=>setTimeout(resolve,ms));
-
-}
-
-/* ===========================================================
-   LOCAL STORAGE
-=========================================================== */
-
-function save(key,value){
-
-    localStorage.setItem(
-
-        SentinelLink.storagePrefix + key,
-
-        JSON.stringify(value)
-
-    );
-
-}
-
-function load(key,defaultValue=null){
-
-    const value = localStorage.getItem(
-
-        SentinelLink.storagePrefix + key
-
-    );
-
-    if(value===null){
-
-        return defaultValue;
+        refreshRate: 3000
 
     }
 
-    return JSON.parse(value);
+};
 
-}
+/*=========================================================
+    Storage Manager
+=========================================================*/
 
-function remove(key){
+SentinelLink.Storage = {
 
-    localStorage.removeItem(
+    get(key){
 
-        SentinelLink.storagePrefix + key
+        try{
 
-    );
+            const value = localStorage.getItem(key);
 
-}
+            if(value===null){
 
-/* ===========================================================
-   SESSION
-=========================================================== */
+                return null;
 
-function saveSession(user){
+            }
 
-    SentinelLink.currentUser = user;
+            return JSON.parse(value);
 
-    save("session",user);
+        }
 
-}
+        catch(error){
 
-function loadSession(){
+            console.error(error);
 
-    SentinelLink.currentUser = load("session");
+            return null;
 
-}
+        }
 
-function logout(){
+    },
 
-    remove("session");
+    set(key,value){
 
-    window.location.href="login.html";
+        localStorage.setItem(
 
-}
+            key,
 
-/* ===========================================================
-   LOGIN
-=========================================================== */
+            JSON.stringify(value)
 
-function login(username,password){
+        );
+
+    },
+
+    remove(key){
+
+        localStorage.removeItem(key);
+
+    },
+
+    exists(key){
+
+        return localStorage.getItem(key)!==null;
+
+    }
+
+};
+
+/*=========================================================
+    Default Data
+=========================================================*/
+
+SentinelLink.initializeStorage = function(){
 
     if(
 
-        username.trim()==="" ||
+        !SentinelLink.Storage.exists(
 
-        password.trim()===""
+            SentinelLink.storageKeys.users
+
+        )
 
     ){
 
-        showToast(
+        SentinelLink.Storage.set(
 
-            "Please enter username and password",
+            SentinelLink.storageKeys.users,
 
-            "warning"
+            [
+
+                {
+
+                    id:"USR001",
+
+                    username:"admin",
+
+                    password:"admin123",
+
+                    name:"Administrator",
+
+                    role:"Administrator"
+
+                }
+
+            ]
 
         );
+
+    }
+
+    if(
+
+        !SentinelLink.Storage.exists(
+
+            SentinelLink.storageKeys.reports
+
+        )
+
+    ){
+
+        SentinelLink.Storage.set(
+
+            SentinelLink.storageKeys.reports,
+
+            []
+
+        );
+
+    }
+
+    if(
+
+        !SentinelLink.Storage.exists(
+
+            SentinelLink.storageKeys.settings
+
+        )
+
+    ){
+
+        SentinelLink.Storage.set(
+
+            SentinelLink.storageKeys.settings,
+
+            SentinelLink.settings
+
+        );
+
+    }
+
+};
+
+/*=========================================================
+    Users
+=========================================================*/
+
+SentinelLink.getUsers=function(){
+
+    return SentinelLink.Storage.get(
+
+        SentinelLink.storageKeys.users
+
+    )||[];
+
+};
+
+SentinelLink.saveUsers=function(users){
+
+    SentinelLink.Storage.set(
+
+        SentinelLink.storageKeys.users,
+
+        users
+
+    );
+
+};
+
+/*=========================================================
+    Reports
+=========================================================*/
+
+SentinelLink.getReports=function(){
+
+    return SentinelLink.Storage.get(
+
+        SentinelLink.storageKeys.reports
+
+    )||[];
+
+};
+
+SentinelLink.saveReports=function(reports){
+
+    SentinelLink.Storage.set(
+
+        SentinelLink.storageKeys.reports,
+
+        reports
+
+    );
+
+};
+
+/*=========================================================
+    Session
+=========================================================*/
+
+SentinelLink.loadSession=function(){
+
+    const session=
+
+    SentinelLink.Storage.get(
+
+        SentinelLink.storageKeys.session
+
+    );
+
+    if(session){
+
+        SentinelLink.currentUser=session;
+
+    }
+
+};
+
+SentinelLink.saveSession=function(user){
+
+    SentinelLink.currentUser=user;
+
+    SentinelLink.Storage.set(
+
+        SentinelLink.storageKeys.session,
+
+        user
+
+    );
+
+};
+
+SentinelLink.logoutSession=function(){
+
+    SentinelLink.currentUser=null;
+
+    SentinelLink.Storage.remove(
+
+        SentinelLink.storageKeys.session
+
+    );
+
+};
+
+/*=========================================================
+    Utilities
+=========================================================*/
+
+SentinelLink.uuid=function(){
+
+    return "RPT-"
+
+    +
+
+    Date.now()
+
+    +
+
+    "-"
+
+    +
+
+    Math.floor(
+
+        Math.random()*100000
+
+    );
+
+};
+
+SentinelLink.now=function(){
+
+    return new Date()
+
+    .toLocaleString();
+
+};
+
+SentinelLink.page=function(){
+
+    return window.location.pathname
+
+    .split("/")
+
+    .pop()
+
+    .toLowerCase();
+
+};
+
+SentinelLink.isLoggedIn=function(){
+
+    return SentinelLink.currentUser!==null;
+
+};
+
+/*=========================================================
+    Startup
+=========================================================*/
+
+SentinelLink.initializeStorage();
+
+SentinelLink.loadSession();
+
+/*=========================================================
+    End Part 1
+=========================================================*/
+/*=========================================================
+    Authentication Module
+=========================================================*/
+
+SentinelLink.Auth = {};
+
+/*=========================================================
+    Find User
+=========================================================*/
+
+SentinelLink.Auth.findUser = function(username){
+
+    return SentinelLink.getUsers().find(function(user){
+
+        return user.username.toLowerCase() ===
+        username.toLowerCase();
+
+    });
+
+};
+
+/*=========================================================
+    Login
+=========================================================*/
+
+SentinelLink.Auth.login = function(username,password){
+
+    username = username.trim();
+
+    password = password.trim();
+
+    if(username==="" || password===""){
+
+        SentinelLink.UI.toast(
+            "Please enter username and password.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+    const user = SentinelLink.Auth.findUser(username);
+
+    if(!user){
+
+        SentinelLink.UI.toast(
+            "User not found.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+    if(user.password!==password){
+
+        SentinelLink.UI.toast(
+            "Incorrect password.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+    SentinelLink.saveSession(user);
+
+    if(document.getElementById("rememberMe")?.checked){
+
+        localStorage.setItem(
+            "sl_remember",
+            username
+        );
+
+    }else{
+
+        localStorage.removeItem(
+            "sl_remember"
+        );
+
+    }
+
+    SentinelLink.UI.toast(
+        "Login successful.",
+        "success"
+    );
+
+    setTimeout(function(){
+
+        window.location.href="dashboard.html";
+
+    },800);
+
+    return true;
+
+};
+
+/*=========================================================
+    Logout
+=========================================================*/
+
+SentinelLink.Auth.logout=function(){
+
+    SentinelLink.logoutSession();
+
+    SentinelLink.UI.toast(
+        "Logged out successfully.",
+        "success"
+    );
+
+    setTimeout(function(){
+
+        window.location.href="login.html";
+
+    },500);
+
+};
+
+/*=========================================================
+    Session Protection
+=========================================================*/
+
+SentinelLink.Auth.protect=function(){
+
+    const publicPages=[
+
+        "index.html",
+
+        "login.html",
+
+        "about.html",
+
+        "help.html"
+
+    ];
+
+    const page=SentinelLink.page();
+
+    if(publicPages.includes(page)){
 
         return;
 
     }
 
-    const user={
+    if(!SentinelLink.isLoggedIn()){
 
-        id:generateID("USER"),
+        window.location.href="login.html";
 
-        username:username,
+    }
 
-        role:"Administrator",
+};
 
-        login:getCurrentDateTime()
+/*=========================================================
+    Auto Redirect
+=========================================================*/
 
-    };
+SentinelLink.Auth.redirectLoggedIn=function(){
 
-    saveSession(user);
+    const page=SentinelLink.page();
 
-    showToast(
+    if(
 
-        "Login Successful",
+        page==="login.html" &&
 
-        "success"
+        SentinelLink.isLoggedIn()
 
-    );
-
-    setTimeout(()=>{
+    ){
 
         window.location.href="dashboard.html";
 
-    },1000);
+    }
 
-}
+};
 
-/* ===========================================================
-   NAVIGATION
-=========================================================== */
+/*=========================================================
+    Session Timeout
+=========================================================*/
 
-function navigate(page){
+SentinelLink.Auth.startSessionMonitor=function(){
 
-    window.location.href=page;
+    const LIMIT=30*60*1000;
 
-}
+    function update(){
 
-function setActiveMenu(){
+        localStorage.setItem(
 
-    const page=
+            "sl_activity",
 
-    window.location.pathname
+            Date.now()
 
-    .split("/")
+        );
 
-    .pop();
+    }
 
-    $$(".menu a").forEach(link=>{
+    function check(){
 
-        link.classList.remove("active");
+        if(!SentinelLink.isLoggedIn()){
 
-        if(
-
-            link.getAttribute("href")===page
-
-        ){
-
-            link.classList.add("active");
+            return;
 
         }
 
-    });
+        const last=Number(
 
-}
+            localStorage.getItem(
 
-/* ===========================================================
-   MOBILE SIDEBAR
-=========================================================== */
+                "sl_activity"
 
-function toggleSidebar(){
+            )
 
-    const sidebar=$(".sidebar");
+        );
 
-    if(!sidebar)return;
+        if(
 
-    sidebar.classList.toggle("open");
+            last &&
 
-}
+            Date.now()-last>LIMIT
 
-/* ===========================================================
-   PAGE TITLE
-=========================================================== */
+        ){
 
-function setPageTitle(title){
+            SentinelLink.Auth.logout();
 
-    document.title=
-
-    "SentinelLink | " + title;
-
-}
-
-/* ===========================================================
-   USER INFO
-=========================================================== */
-
-function displayCurrentUser(){
-
-    loadSession();
-
-    if(!SentinelLink.currentUser)return;
-
-    const userName=$(".user-name");
-
-    if(userName){
-
-        userName.textContent=
-
-        SentinelLink.currentUser.username;
+        }
 
     }
 
-}
+    [
 
-/* ===========================================================
-   END PART 1
-=========================================================== */
-/* ===========================================================
-   SentinelLink
-   app.js
-   Part 2/5
-   Notifications, Modals & UI
-=========================================================== */
+        "click",
 
-/* ===========================================================
-   TOAST NOTIFICATIONS
-=========================================================== */
+        "keydown",
 
-function showToast(message,type="info"){
+        "touchstart",
 
-    let container=$("#toast-container");
+        "mousemove"
 
-    if(!container){
+    ].forEach(function(eventName){
 
-        container=create("div");
+        document.addEventListener(
 
-        container.id="toast-container";
+            eventName,
 
-        container.style.position="fixed";
-        container.style.top="20px";
-        container.style.right="20px";
-        container.style.zIndex="9999";
-
-        document.body.appendChild(container);
-
-    }
-
-    const toast=create("div");
-
-    toast.className="toast " + type;
-
-    toast.style.marginBottom="12px";
-    toast.style.padding="14px 18px";
-    toast.style.borderRadius="12px";
-    toast.style.background="#0f172a";
-    toast.style.color="#fff";
-    toast.style.border="1px solid rgba(255,255,255,.1)";
-    toast.style.boxShadow="0 12px 30px rgba(0,0,0,.3)";
-    toast.style.opacity="0";
-    toast.style.transition=".3s";
-
-    switch(type){
-
-        case "success":
-            toast.style.borderLeft="5px solid #22c55e";
-            break;
-
-        case "warning":
-            toast.style.borderLeft="5px solid #f59e0b";
-            break;
-
-        case "error":
-            toast.style.borderLeft="5px solid #ef4444";
-            break;
-
-        default:
-            toast.style.borderLeft="5px solid #3b82f6";
-
-    }
-
-    toast.textContent=message;
-
-    container.appendChild(toast);
-
-    requestAnimationFrame(()=>{
-
-        toast.style.opacity="1";
-
-    });
-
-    setTimeout(()=>{
-
-        toast.style.opacity="0";
-
-        setTimeout(()=>{
-
-            toast.remove();
-
-        },300);
-
-    },3000);
-
-}
-
-/* ===========================================================
-   LOADING SCREEN
-=========================================================== */
-
-function showLoader(){
-
-    let loader=$("#sl-loader");
-
-    if(loader)return;
-
-    loader=create("div");
-
-    loader.id="sl-loader";
-
-    loader.innerHTML=`
-    <div class="loader-box">
-        <h3>Loading...</h3>
-    </div>
-    `;
-
-    loader.style.position="fixed";
-    loader.style.inset="0";
-    loader.style.background="rgba(7,17,31,.75)";
-    loader.style.display="flex";
-    loader.style.alignItems="center";
-    loader.style.justifyContent="center";
-    loader.style.zIndex="9998";
-
-    document.body.appendChild(loader);
-
-}
-
-function hideLoader(){
-
-    const loader=$("#sl-loader");
-
-    if(loader){
-
-        loader.remove();
-
-    }
-
-}
-
-/* ===========================================================
-   MODAL
-=========================================================== */
-
-function openModal(title,content){
-
-    closeModal();
-
-    const modal=create("div");
-
-    modal.id="sl-modal";
-
-    modal.style.position="fixed";
-    modal.style.inset="0";
-    modal.style.background="rgba(0,0,0,.55)";
-    modal.style.display="flex";
-    modal.style.alignItems="center";
-    modal.style.justifyContent="center";
-    modal.style.zIndex="9999";
-
-    modal.innerHTML=`
-
-    <div style="
-        width:min(550px,92%);
-        background:#0f172a;
-        border-radius:18px;
-        padding:24px;
-        border:1px solid rgba(255,255,255,.08);
-    ">
-
-        <h2>${title}</h2>
-
-        <div style="margin:18px 0;line-height:1.7;">
-            ${content}
-        </div>
-
-        <button
-        class="primary"
-        onclick="closeModal()">
-
-        Close
-
-        </button>
-
-    </div>
-
-    `;
-
-    document.body.appendChild(modal);
-
-}
-
-function closeModal(){
-
-    const modal=$("#sl-modal");
-
-    if(modal){
-
-        modal.remove();
-
-    }
-
-}
-
-/* ===========================================================
-   CONFIRMATION
-=========================================================== */
-
-function confirmAction(message,callback){
-
-    const confirmed=
-
-    confirm(message);
-
-    if(
-
-        confirmed &&
-
-        typeof callback==="function"
-
-    ){
-
-        callback();
-
-    }
-
-}
-
-/* ===========================================================
-   THEME
-=========================================================== */
-
-function loadTheme(){
-
-    const theme=
-
-    load("theme","dark");
-
-    SentinelLink.currentTheme=
-
-    theme;
-
-    document.body.dataset.theme=
-
-    theme;
-
-}
-
-function toggleTheme(){
-
-    SentinelLink.currentTheme=
-
-    SentinelLink.currentTheme==="dark"
-
-    ?"light"
-
-    :"dark";
-
-    save(
-
-        "theme",
-
-        SentinelLink.currentTheme
-
-    );
-
-    document.body.dataset.theme=
-
-    SentinelLink.currentTheme;
-
-    showToast(
-
-        "Theme updated",
-
-        "success"
-
-    );
-
-}
-
-/* ===========================================================
-   KEYBOARD SHORTCUTS
-=========================================================== */
-
-document.addEventListener(
-
-"keydown",
-
-function(e){
-
-    if(
-
-        e.key==="Escape"
-
-    ){
-
-        closeModal();
-
-    }
-
-    if(
-
-        e.ctrlKey &&
-
-        e.key==="l"
-
-    ){
-
-        e.preventDefault();
-
-        logout();
-
-    }
-
-}
-
-);
-
-/* ===========================================================
-   SCROLL
-=========================================================== */
-
-function scrollTopPage(){
-
-    window.scrollTo({
-
-        top:0,
-
-        behavior:"smooth"
-
-    });
-
-}
-
-/* ===========================================================
-   COPY TO CLIPBOARD
-=========================================================== */
-
-function copyText(text){
-
-    navigator.clipboard
-
-    .writeText(text)
-
-    .then(()=>{
-
-        showToast(
-
-            "Copied to clipboard",
-
-            "success"
+            update
 
         );
 
     });
 
-}
+    setInterval(check,60000);
 
-/* ===========================================================
-   END PART 2
-=========================================================== */
-/* ===========================================================
-   SentinelLink
-   app.js
-   Part 3/5
-   Forms, Reports & Search
-=========================================================== */
+};
 
-/* ===========================================================
-   FORM VALIDATION
-=========================================================== */
+/*=========================================================
+    Login Form
+=========================================================*/
 
-function validateRequired(form){
+SentinelLink.Auth.initializeLogin=function(){
 
-    let valid=true;
+    const form=document.getElementById(
 
-    const fields=
-
-    form.querySelectorAll(
-
-    "[required]"
+        "loginForm"
 
     );
 
-    fields.forEach(field=>{
+    if(!form){
 
-        if(
+        return;
 
-            field.value.trim()===""
+    }
 
-        ){
+    const remembered=
 
-            field.style.borderColor=
+    localStorage.getItem(
 
-            "#ef4444";
+        "sl_remember"
 
-            valid=false;
+    );
 
-        }else{
+    if(remembered){
 
-            field.style.borderColor="";
+        const username=
+
+        document.getElementById(
+
+            "username"
+
+        );
+
+        if(username){
+
+            username.value=remembered;
 
         }
 
-    });
+        const remember=
 
-    return valid;
+        document.getElementById(
 
-}
+            "rememberMe"
 
-/* ===========================================================
-   REPORT STORAGE
-=========================================================== */
+        );
 
-function getReports(){
+        if(remember){
 
-    return load("reports",[]);
+            remember.checked=true;
 
-}
+        }
 
-function saveReports(reports){
+    }
 
-    save("reports",reports);
+    form.addEventListener(
 
-}
+        "submit",
 
-function createReport(data){
+        function(event){
 
-    const reports=getReports();
+            event.preventDefault();
 
-    const report={
+            SentinelLink.Auth.login(
 
-        id:generateID("REP"),
+                document.getElementById(
 
-        date:getCurrentDate(),
+                    "username"
 
-        time:getCurrentTime(),
+                ).value,
 
-        status:"Pending",
+                document.getElementById(
 
-        ...data
+                    "password"
+
+                ).value
+
+            );
+
+        }
+
+    );
+
+};
+
+/*=========================================================
+    Current User
+=========================================================*/
+
+SentinelLink.Auth.showCurrentUser=function(){
+
+    const element=document.getElementById(
+
+        "currentUser"
+
+    );
+
+    if(
+
+        !element ||
+
+        !SentinelLink.isLoggedIn()
+
+    ){
+
+        return;
+
+    }
+
+    element.textContent=
+
+    SentinelLink.currentUser.name;
+
+};
+
+/*=========================================================
+    Logout Button
+=========================================================*/
+
+SentinelLink.Auth.initializeLogout=function(){
+
+    const button=document.getElementById(
+
+        "logoutButton"
+
+    );
+
+    if(!button){
+
+        return;
+
+    }
+
+    button.addEventListener(
+
+        "click",
+
+        SentinelLink.Auth.logout
+
+    );
+
+};
+/*=========================================================
+    Report Manager
+=========================================================*/
+
+SentinelLink.Reports = {};
+
+/*=========================================================
+    Get All Reports
+=========================================================*/
+
+SentinelLink.Reports.all = function(){
+
+    return SentinelLink.getReports();
+
+};
+
+/*=========================================================
+    Save
+=========================================================*/
+
+SentinelLink.Reports.save = function(reports){
+
+    SentinelLink.saveReports(reports);
+
+};
+
+/*=========================================================
+    Create Report
+=========================================================*/
+
+SentinelLink.Reports.create = function(data){
+
+    const reports = SentinelLink.Reports.all();
+
+    const report = {
+
+        id: SentinelLink.uuid(),
+
+        reporter: data.reporter,
+
+        phone: data.phone,
+
+        category: data.category,
+
+        priority: data.priority,
+
+        location: data.location,
+
+        description: data.description,
+
+        status: "Pending",
+
+        createdBy: SentinelLink.currentUser ?
+        SentinelLink.currentUser.username :
+        "Guest",
+
+        createdAt: SentinelLink.now(),
+
+        updatedAt: SentinelLink.now()
 
     };
 
-    reports.push(report);
+    reports.unshift(report);
 
-    saveReports(reports);
+    SentinelLink.Reports.save(reports);
 
-    showToast(
+    SentinelLink.UI.toast(
 
-        "Incident report submitted.",
+        "Report submitted successfully.",
 
         "success"
 
@@ -757,583 +814,309 @@ function createReport(data){
 
     return report;
 
-}
+};
 
-function updateReport(id,newData){
+/*=========================================================
+    Find Report
+=========================================================*/
 
-    const reports=getReports();
+SentinelLink.Reports.find = function(id){
 
-    const index=
+    return SentinelLink.Reports.all()
 
-    reports.findIndex(
+    .find(function(report){
 
-    r=>r.id===id
+        return report.id===id;
 
-    );
+    });
 
-    if(index!==-1){
+};
 
-        reports[index]={
+/*=========================================================
+    Delete Report
+=========================================================*/
 
-            ...reports[index],
+SentinelLink.Reports.remove = function(id){
 
-            ...newData
+    const reports =
 
-        };
+    SentinelLink.Reports.all()
 
-        saveReports(reports);
+    .filter(function(report){
 
-        showToast(
+        return report.id!==id;
 
-            "Report updated.",
+    });
 
-            "success"
+    SentinelLink.Reports.save(reports);
 
-        );
-
-    }
-
-}
-
-function deleteReport(id){
-
-    let reports=getReports();
-
-    reports=
-
-    reports.filter(
-
-    r=>r.id!==id
-
-    );
-
-    saveReports(reports);
-
-    showToast(
+    SentinelLink.UI.toast(
 
         "Report deleted.",
-
-        "warning"
-
-    );
-
-}
-
-/* ===========================================================
-   REPORT SEARCH
-=========================================================== */
-
-function searchReports(keyword){
-
-    keyword=
-
-    keyword.toLowerCase();
-
-    return getReports().filter(
-
-    report=>{
-
-        return(
-
-        report.id
-
-        .toLowerCase()
-
-        .includes(keyword)
-
-        ||
-
-        (report.category||"")
-
-        .toLowerCase()
-
-        .includes(keyword)
-
-        ||
-
-        (report.location||"")
-
-        .toLowerCase()
-
-        .includes(keyword)
-
-        ||
-
-        (report.status||"")
-
-        .toLowerCase()
-
-        .includes(keyword)
-
-        );
-
-    }
-
-    );
-
-}
-
-/* ===========================================================
-   REPORT FILTER
-=========================================================== */
-
-function filterReports(status){
-
-    if(
-
-        status==="All"
-
-    ){
-
-        return getReports();
-
-    }
-
-    return getReports().filter(
-
-    report=>
-
-    report.status===status
-
-    );
-
-}
-
-/* ===========================================================
-   SETTINGS
-=========================================================== */
-
-function loadSettings(){
-
-    SentinelLink.settings=
-
-    load(
-
-    "settings",
-
-    {
-
-        theme:"dark",
-
-        notifications:true,
-
-        language:"English"
-
-    }
-
-    );
-
-}
-
-function saveSettings(){
-
-    save(
-
-    "settings",
-
-    SentinelLink.settings
-
-    );
-
-    showToast(
-
-        "Settings saved.",
 
         "success"
 
     );
 
-}
+};
 
-/* ===========================================================
-   NOTIFICATIONS
-=========================================================== */
+/*=========================================================
+    Update Status
+=========================================================*/
 
-function getNotifications(){
+SentinelLink.Reports.updateStatus=function(
 
-    return load(
+    id,
 
-    "notifications",
-
-    []
-
-    );
-
-}
-
-function addNotification(
-
-title,
-
-message,
-
-type="info"
+    status
 
 ){
 
-    const notifications=
+    const reports=
 
-    getNotifications();
-
-    notifications.unshift({
-
-        id:generateID("NOT"),
-
-        title,
-
-        message,
-
-        type,
-
-        date:getCurrentDateTime(),
-
-        read:false
-
-    });
-
-    save(
-
-        "notifications",
-
-        notifications
-
-    );
-
-}
-
-function markNotificationRead(id){
-
-    const list=
-
-    getNotifications();
-
-    const item=
-
-    list.find(
-
-    n=>n.id===id
-
-    );
-
-    if(item){
-
-        item.read=true;
-
-        save(
-
-        "notifications",
-
-        list
-
-        );
-
-    }
-
-}
-
-/* ===========================================================
-   DASHBOARD COUNTERS
-=========================================================== */
-
-function totalReports(){
-
-    return getReports().length;
-
-}
-
-function pendingReports(){
-
-    return getReports()
-
-    .filter(
-
-    r=>r.status==="Pending"
-
-    ).length;
-
-}
-
-function resolvedReports(){
-
-    return getReports()
-
-    .filter(
-
-    r=>r.status==="Resolved"
-
-    ).length;
-
-}
-
-function updateDashboardStats(){
-
-    const total=$("#totalReports");
-
-    const pending=$("#pendingReports");
-
-    const resolved=$("#resolvedReports");
-
-    if(total)
-
-    total.textContent=
-
-    totalReports();
-
-    if(pending)
-
-    pending.textContent=
-
-    pendingReports();
-
-    if(resolved)
-
-    resolved.textContent=
-
-    resolvedReports();
-
-}
-
-/* ===========================================================
-   END PART 3
-=========================================================== */
-/* ===========================================================
-   SentinelLink
-   app.js
-   Part 4/5
-   Tables, Sessions & Utilities
-=========================================================== */
-
-/* ===========================================================
-   REPORT TABLE RENDERING
-=========================================================== */
-
-function renderReportsTable(tableBodyId,reports){
-
-    const tableBody=
-
-    document.getElementById(tableBodyId);
-
-    if(!tableBody)return;
-
-    tableBody.innerHTML="";
-
-    if(reports.length===0){
-
-        tableBody.innerHTML=`
-        <tr>
-            <td colspan="6" style="text-align:center;">
-                No reports found.
-            </td>
-        </tr>`;
-
-        return;
-
-    }
-
-    reports.forEach(report=>{
-
-        const row=document.createElement("tr");
-
-        row.innerHTML=`
-
-        <td>${report.id}</td>
-
-        <td>${report.category||"-"}</td>
-
-        <td>${report.location||"-"}</td>
-
-        <td>${report.date}</td>
-
-        <td>${report.status}</td>
-
-        <td>
-
-            <button
-            class="small primary"
-            onclick="viewReport('${report.id}')">
-
-            View
-
-            </button>
-
-        </td>
-
-        `;
-
-        tableBody.appendChild(row);
-
-    });
-
-}
-
-/* ===========================================================
-   REPORT DETAILS
-=========================================================== */
-
-function viewReport(id){
+    SentinelLink.Reports.all();
 
     const report=
 
-    getReports().find(
+    reports.find(function(item){
 
-    r=>r.id===id
+        return item.id===id;
 
-    );
+    });
 
     if(!report){
 
-        showToast(
+        return false;
 
-        "Report not found.",
+    }
 
-        "error"
+    report.status=status;
+
+    report.updatedAt=
+
+    SentinelLink.now();
+
+    SentinelLink.Reports.save(reports);
+
+    return true;
+
+};
+
+/*=========================================================
+    Search
+=========================================================*/
+
+SentinelLink.Reports.search=function(keyword){
+
+    keyword=
+
+    keyword.toLowerCase();
+
+    return SentinelLink.Reports.all()
+
+    .filter(function(report){
+
+        return JSON.stringify(report)
+
+        .toLowerCase()
+
+        .includes(keyword);
+
+    });
+
+};
+
+/*=========================================================
+    Filter
+=========================================================*/
+
+SentinelLink.Reports.filterStatus=function(status){
+
+    if(status==="All"){
+
+        return SentinelLink.Reports.all();
+
+    }
+
+    return SentinelLink.Reports.all()
+
+    .filter(function(report){
+
+        return report.status===status;
+
+    });
+
+};
+
+/*=========================================================
+    Validate Report
+=========================================================*/
+
+SentinelLink.Reports.validate=function(data){
+
+    if(!data.reporter.trim()){
+
+        SentinelLink.UI.toast(
+
+            "Reporter name required.",
+
+            "error"
 
         );
+
+        return false;
+
+    }
+
+    if(!data.phone.trim()){
+
+        SentinelLink.UI.toast(
+
+            "Phone number required.",
+
+            "error"
+
+        );
+
+        return false;
+
+    }
+
+    if(!data.location.trim()){
+
+        SentinelLink.UI.toast(
+
+            "Location required.",
+
+            "error"
+
+        );
+
+        return false;
+
+    }
+
+    if(!data.description.trim()){
+
+        SentinelLink.UI.toast(
+
+            "Description required.",
+
+            "error"
+
+        );
+
+        return false;
+
+    }
+
+    return true;
+
+};
+
+/*=========================================================
+    Report Form
+=========================================================*/
+
+SentinelLink.Reports.initializeForm=function(){
+
+    const form=
+
+    document.getElementById(
+
+        "reportForm"
+
+    );
+
+    if(!form){
 
         return;
 
     }
 
-    openModal(
+    form.addEventListener(
 
-        "Incident Report",
+        "submit",
 
-        `
-        <p><strong>ID:</strong> ${report.id}</p>
-        <p><strong>Category:</strong> ${report.category||"-"}</p>
-        <p><strong>Location:</strong> ${report.location||"-"}</p>
-        <p><strong>Status:</strong> ${report.status}</p>
-        <p><strong>Date:</strong> ${report.date}</p>
-        <p><strong>Description:</strong><br>
-        ${report.description||"No description"}
-        </p>
-        `
+        function(event){
 
-    );
+            event.preventDefault();
 
-}
+            const data={
 
-/* ===========================================================
-   SORT REPORTS
-=========================================================== */
+                reporter:
 
-function sortReports(field){
+                document.getElementById("reporter").value,
 
-    const reports=getReports();
+                phone:
 
-    reports.sort((a,b)=>{
+                document.getElementById("phone").value,
 
-        if(a[field]<b[field]) return -1;
+                category:
 
-        if(a[field]>b[field]) return 1;
+                document.getElementById("category").value,
 
-        return 0;
+                priority:
 
-    });
+                document.getElementById("priority").value,
 
-    return reports;
+                location:
 
-}
+                document.getElementById("location").value,
 
-/* ===========================================================
-   SESSION CHECK
-=========================================================== */
+                description:
 
-function requireLogin(){
+                document.getElementById("description").value
 
-    loadSession();
+            };
 
-    const page=
+            if(
 
-    window.location.pathname
+                !SentinelLink.Reports.validate(data)
 
-    .split("/")
+            ){
 
-    .pop();
+                return;
 
-    if(
+            }
 
-        page!=="login.html" &&
+            SentinelLink.Reports.create(data);
 
-        !SentinelLink.currentUser
+            form.reset();
 
-    ){
-
-        window.location.href=
-
-        "login.html";
-
-    }
-
-}
-
-/* ===========================================================
-   USER PROFILE
-=========================================================== */
-
-function getCurrentUser(){
-
-    loadSession();
-
-    return SentinelLink.currentUser;
-
-}
-
-function updateCurrentUser(data){
-
-    const user=
-
-    getCurrentUser();
-
-    if(!user)return;
-
-    Object.assign(user,data);
-
-    saveSession(user);
-
-    displayCurrentUser();
-
-}
-
-/* ===========================================================
-   AUTO SAVE
-=========================================================== */
-
-function autoSave(key,data){
-
-    save(key,data);
-
-}
-
-/* ===========================================================
-   EXPORT
-=========================================================== */
-
-function exportReports(){
-
-    const data=
-
-    JSON.stringify(
-
-    getReports(),
-
-    null,
-
-    2
+        }
 
     );
 
-    const blob=
+};
 
-    new Blob(
+/*=========================================================
+    Export
+=========================================================*/
 
-    [data],
+SentinelLink.Reports.exportJSON=function(){
 
-    {
+    const blob=new Blob(
 
-        type:"application/json"
+        [
 
-    }
+            JSON.stringify(
+
+                SentinelLink.Reports.all(),
+
+                null,
+
+                2
+
+            )
+
+        ],
+
+        {
+
+            type:"application/json"
+
+        }
 
     );
 
@@ -1343,4 +1126,954 @@ function exportReports(){
 
     const link=
 
-    document.createElement(
+    document.createElement("a");
+
+    link.href=url;
+
+    link.download="reports.json";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+};
+/*=========================================================
+    Dashboard & Reports UI
+=========================================================*/
+
+SentinelLink.Dashboard = {};
+SentinelLink.ReportUI = {};
+
+/*=========================================================
+    Dashboard Statistics
+=========================================================*/
+
+SentinelLink.Dashboard.statistics=function(){
+
+    const reports=SentinelLink.Reports.all();
+
+    return{
+
+        total:reports.length,
+
+        pending:reports.filter(r=>r.status==="Pending").length,
+
+        active:reports.filter(r=>r.status==="Active").length,
+
+        resolved:reports.filter(r=>r.status==="Resolved").length
+
+    };
+
+};
+
+/*=========================================================
+    Update Dashboard Cards
+=========================================================*/
+
+SentinelLink.Dashboard.refresh=function(){
+
+    const stats=
+
+    SentinelLink.Dashboard.statistics();
+
+    const ids={
+
+        totalReports:stats.total,
+
+        pendingReports:stats.pending,
+
+        activeReports:stats.active,
+
+        resolvedReports:stats.resolved
+
+    };
+
+    Object.keys(ids).forEach(function(id){
+
+        const element=document.getElementById(id);
+
+        if(element){
+
+            element.textContent=ids[id];
+
+        }
+
+    });
+
+};
+
+/*=========================================================
+    Recent Reports
+=========================================================*/
+
+SentinelLink.Dashboard.recent=function(){
+
+    const container=
+
+    document.getElementById(
+
+        "recentReports"
+
+    );
+
+    if(!container){
+
+        return;
+
+    }
+
+    const reports=
+
+    SentinelLink.Reports.all()
+
+    .slice(0,5);
+
+    if(reports.length===0){
+
+        container.innerHTML=
+
+        "<p>No reports available.</p>";
+
+        return;
+
+    }
+
+    container.innerHTML=
+
+    reports.map(function(report){
+
+        return `
+
+        <div class="recent-report">
+
+            <strong>${report.category}</strong>
+
+            <br>
+
+            ${report.location}
+
+            <br>
+
+            ${report.status}
+
+            <br>
+
+            <small>${report.createdAt}</small>
+
+        </div>
+
+        `;
+
+    }).join("");
+
+};
+
+/*=========================================================
+    Report Row
+=========================================================*/
+
+SentinelLink.ReportUI.row=function(report){
+
+    return `
+
+<tr>
+
+<td>${report.id}</td>
+
+<td>${report.reporter}</td>
+
+<td>${report.category}</td>
+
+<td>${report.priority}</td>
+
+<td>${report.location}</td>
+
+<td>${report.status}</td>
+
+<td>
+
+<select
+onchange="SentinelLink.ReportUI.changeStatus('${report.id}',this.value)">
+
+<option value="Pending"
+${report.status==="Pending"?"selected":""}>
+Pending
+</option>
+
+<option value="Active"
+${report.status==="Active"?"selected":""}>
+Active
+</option>
+
+<option value="Resolved"
+${report.status==="Resolved"?"selected":""}>
+Resolved
+</option>
+
+</select>
+
+</td>
+
+<td>
+
+<button
+onclick="SentinelLink.ReportUI.remove('${report.id}')">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+};
+
+/*=========================================================
+    Render Table
+=========================================================*/
+
+SentinelLink.ReportUI.render=function(list=null){
+
+    const body=
+
+    document.getElementById(
+
+        "reportsTable"
+
+    );
+
+    if(!body){
+
+        return;
+
+    }
+
+    const reports=
+
+    list ||
+
+    SentinelLink.Reports.all();
+
+    if(reports.length===0){
+
+        body.innerHTML=
+
+        `<tr>
+
+        <td colspan="8">
+
+        No reports found.
+
+        </td>
+
+        </tr>`;
+
+        return;
+
+    }
+
+    body.innerHTML=
+
+    reports.map(
+
+        SentinelLink.ReportUI.row
+
+    ).join("");
+
+};
+
+/*=========================================================
+    Search
+=========================================================*/
+
+SentinelLink.ReportUI.initializeSearch=function(){
+
+    const search=
+
+    document.getElementById(
+
+        "searchReports"
+
+    );
+
+    if(!search){
+
+        return;
+
+    }
+
+    search.addEventListener(
+
+        "input",
+
+        function(){
+
+            const value=
+
+            search.value.trim();
+
+            if(value===""){
+
+                SentinelLink.ReportUI.render();
+
+                return;
+
+            }
+
+            SentinelLink.ReportUI.render(
+
+                SentinelLink.Reports.search(value)
+
+            );
+
+        }
+
+    );
+
+};
+
+/*=========================================================
+    Status
+=========================================================*/
+
+SentinelLink.ReportUI.changeStatus=function(
+
+    id,
+
+    status
+
+){
+
+    SentinelLink.Reports.updateStatus(
+
+        id,
+
+        status
+
+    );
+
+    SentinelLink.ReportUI.render();
+
+    SentinelLink.Dashboard.refresh();
+
+};
+
+/*=========================================================
+    Delete
+=========================================================*/
+
+SentinelLink.ReportUI.remove=function(id){
+
+    if(
+
+        !confirm(
+
+            "Delete this report?"
+
+        )
+
+    ){
+
+        return;
+
+    }
+
+    SentinelLink.Reports.remove(id);
+
+    SentinelLink.ReportUI.render();
+
+    SentinelLink.Dashboard.refresh();
+
+};
+
+/*=========================================================
+    Auto Refresh
+=========================================================*/
+
+SentinelLink.Dashboard.start=function(){
+
+    SentinelLink.Dashboard.refresh();
+
+    SentinelLink.Dashboard.recent();
+
+    setInterval(function(){
+
+        SentinelLink.Dashboard.refresh();
+
+        SentinelLink.Dashboard.recent();
+
+    },3000);
+
+};
+
+/*=========================================================
+    Reports Page Start
+=========================================================*/
+
+SentinelLink.ReportUI.start=function(){
+
+    SentinelLink.ReportUI.render();
+
+    SentinelLink.ReportUI.initializeSearch();
+
+};
+/*=========================================================
+    UI Module
+=========================================================*/
+
+SentinelLink.UI = {};
+
+/*=========================================================
+    Toast Notification
+=========================================================*/
+
+SentinelLink.UI.toast=function(message,type="info"){
+
+    let toast=document.getElementById("sl-toast");
+
+    if(!toast){
+
+        toast=document.createElement("div");
+
+        toast.id="sl-toast";
+
+        toast.style.position="fixed";
+        toast.style.bottom="20px";
+        toast.style.right="20px";
+        toast.style.padding="14px 20px";
+        toast.style.borderRadius="8px";
+        toast.style.color="#ffffff";
+        toast.style.fontWeight="600";
+        toast.style.zIndex="9999";
+        toast.style.display="none";
+
+        document.body.appendChild(toast);
+
+    }
+
+    const colours={
+
+        success:"#16a34a",
+
+        error:"#dc2626",
+
+        warning:"#d97706",
+
+        info:"#2563eb"
+
+    };
+
+    toast.style.background=
+
+    colours[type]||
+
+    colours.info;
+
+    toast.textContent=message;
+
+    toast.style.display="block";
+
+    clearTimeout(toast.timer);
+
+    toast.timer=setTimeout(function(){
+
+        toast.style.display="none";
+
+    },3000);
+
+};
+
+/*=========================================================
+    Loading Overlay
+=========================================================*/
+
+SentinelLink.UI.showLoading=function(text="Loading..."){
+
+    let overlay=
+
+    document.getElementById(
+
+        "sl-loading"
+
+    );
+
+    if(!overlay){
+
+        overlay=document.createElement("div");
+
+        overlay.id="sl-loading";
+
+        overlay.style.position="fixed";
+        overlay.style.top="0";
+        overlay.style.left="0";
+        overlay.style.width="100%";
+        overlay.style.height="100%";
+        overlay.style.background="rgba(0,0,0,.45)";
+        overlay.style.display="flex";
+        overlay.style.alignItems="center";
+        overlay.style.justifyContent="center";
+        overlay.style.color="#fff";
+        overlay.style.fontSize="22px";
+        overlay.style.zIndex="9998";
+
+        document.body.appendChild(
+
+            overlay
+
+        );
+
+    }
+
+    overlay.textContent=text;
+
+    overlay.style.display="flex";
+
+};
+
+SentinelLink.UI.hideLoading=function(){
+
+    const overlay=
+
+    document.getElementById(
+
+        "sl-loading"
+
+    );
+
+    if(overlay){
+
+        overlay.style.display="none";
+
+    }
+
+};
+
+/*=========================================================
+    Analytics
+=========================================================*/
+
+SentinelLink.Analytics={};
+
+SentinelLink.Analytics.statistics=function(){
+
+    const reports=
+
+    SentinelLink.Reports.all();
+
+    const stats={
+
+        total:reports.length,
+
+        pending:0,
+
+        active:0,
+
+        resolved:0,
+
+        categories:{}
+
+    };
+
+    reports.forEach(function(report){
+
+        if(
+
+            report.status==="Pending"
+
+        ){
+
+            stats.pending++;
+
+        }
+
+        if(
+
+            report.status==="Active"
+
+        ){
+
+            stats.active++;
+
+        }
+
+        if(
+
+            report.status==="Resolved"
+
+        ){
+
+            stats.resolved++;
+
+        }
+
+        stats.categories[
+
+            report.category
+
+        ]=(
+
+            stats.categories[
+
+                report.category
+
+            ]||0
+
+        )+1;
+
+    });
+
+    return stats;
+
+};
+
+/*=========================================================
+    Update Analytics Page
+=========================================================*/
+
+SentinelLink.Analytics.refresh=function(){
+
+    const stats=
+
+    SentinelLink.Analytics.statistics();
+
+    const ids={
+
+        analyticsTotal:
+
+        stats.total,
+
+        analyticsPending:
+
+        stats.pending,
+
+        analyticsActive:
+
+        stats.active,
+
+        analyticsResolved:
+
+        stats.resolved
+
+    };
+
+    Object.keys(ids).forEach(function(id){
+
+        const element=
+
+        document.getElementById(id);
+
+        if(element){
+
+            element.textContent=
+
+            ids[id];
+
+        }
+
+    });
+
+    const categories=
+
+    document.getElementById(
+
+        "analyticsCategories"
+
+    );
+
+    if(categories){
+
+        categories.innerHTML=
+
+        "";
+
+        Object.keys(
+
+            stats.categories
+
+        ).forEach(function(name){
+
+            const item=
+
+            document.createElement("li");
+
+            item.textContent=
+
+            name+
+
+            ": "+
+
+            stats.categories[name];
+
+            categories.appendChild(item);
+
+        });
+
+    }
+
+};
+
+/*=========================================================
+    Confirm Dialog
+=========================================================*/
+
+SentinelLink.UI.confirm=function(
+
+    message
+
+){
+
+    return confirm(message);
+
+};
+
+/*=========================================================
+    Empty State
+=========================================================*/
+
+SentinelLink.UI.empty=function(
+
+    element,
+
+    text
+
+){
+
+    if(element){
+
+        element.innerHTML=
+
+        "<p>"+text+"</p>";
+
+    }
+
+};
+
+/*=========================================================
+    END PART 5
+=========================================================*/
+/*=========================================================
+    SentinelLink Beta v2.0
+    Final Initializer
+=========================================================*/
+
+SentinelLink.App = {};
+
+/*=========================================================
+    Router
+=========================================================*/
+
+SentinelLink.App.page = function () {
+
+    return window.location.pathname
+        .split("/")
+        .pop()
+        .toLowerCase();
+
+};
+
+/*=========================================================
+    Protected Pages
+=========================================================*/
+
+SentinelLink.App.protect = function () {
+
+    const publicPages = [
+
+        "",
+
+        "index.html",
+
+        "login.html",
+
+        "about.html",
+
+        "help.html"
+
+    ];
+
+    const page = SentinelLink.App.page();
+
+    if (publicPages.includes(page)) {
+
+        return;
+
+    }
+
+    if (!SentinelLink.isLoggedIn()) {
+
+        window.location.href = "login.html";
+
+    }
+
+};
+
+/*=========================================================
+    Dashboard
+=========================================================*/
+
+SentinelLink.App.dashboard = function () {
+
+    SentinelLink.Dashboard.refresh();
+
+    SentinelLink.Dashboard.recent();
+
+    if (SentinelLink.settings.autoRefresh) {
+
+        setInterval(function () {
+
+            SentinelLink.Dashboard.refresh();
+
+            SentinelLink.Dashboard.recent();
+
+        }, SentinelLink.settings.refreshRate);
+
+    }
+
+};
+
+/*=========================================================
+    Reports
+=========================================================*/
+
+SentinelLink.App.reports = function () {
+
+    SentinelLink.ReportUI.start();
+
+};
+
+/*=========================================================
+    Report Form
+=========================================================*/
+
+SentinelLink.App.reportForm = function () {
+
+    SentinelLink.Reports.initializeForm();
+
+};
+
+/*=========================================================
+    Analytics
+=========================================================*/
+
+SentinelLink.App.analytics = function () {
+
+    SentinelLink.Analytics.refresh();
+
+    if (SentinelLink.settings.autoRefresh) {
+
+        setInterval(function () {
+
+            SentinelLink.Analytics.refresh();
+
+        }, SentinelLink.settings.refreshRate);
+
+    }
+
+};
+
+/*=========================================================
+    Authentication
+=========================================================*/
+
+SentinelLink.App.authentication = function () {
+
+    SentinelLink.Auth.initializeLogin();
+
+    SentinelLink.Auth.initializeLogout();
+
+    SentinelLink.Auth.showCurrentUser();
+
+    SentinelLink.Auth.redirectLoggedIn();
+
+    SentinelLink.Auth.startSessionMonitor();
+
+};
+
+/*=========================================================
+    Page Loader
+=========================================================*/
+
+SentinelLink.App.loadPage = function () {
+
+    switch (SentinelLink.App.page()) {
+
+        case "dashboard.html":
+
+            SentinelLink.App.dashboard();
+
+            break;
+
+        case "report.html":
+
+            SentinelLink.App.reportForm();
+
+            break;
+
+        case "reports.html":
+
+            SentinelLink.App.reports();
+
+            break;
+
+        case "analytics.html":
+
+            SentinelLink.App.analytics();
+
+            break;
+
+        default:
+
+            break;
+
+    }
+
+};
+
+/*=========================================================
+    Application Start
+=========================================================*/
+
+SentinelLink.App.start = function () {
+
+    SentinelLink.App.protect();
+
+    SentinelLink.App.authentication();
+
+    SentinelLink.App.loadPage();
+
+    console.log(
+
+        SentinelLink.appName +
+
+        " " +
+
+        SentinelLink.version +
+
+        " started successfully."
+
+    );
+
+};
+
+/*=========================================================
+    DOM Ready
+=========================================================*/
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    function () {
+
+        SentinelLink.App.start();
+
+    }
+
+);
+
+/*=========================================================
+    End of app.js
+=========================================================*/
