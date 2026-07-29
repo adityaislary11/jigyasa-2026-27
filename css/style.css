@@ -1108,7 +1108,68 @@ font-size:28px;
 }
 
 }
+.map-container {
+    position: relative;
+    height: 450px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+}
 
+
+#incidentMap {
+    width:100%;
+    height:100%;
+    position:relative;
+    background:
+    linear-gradient(
+        45deg,
+        #e2e8f0 25%,
+        transparent 25%
+    ),
+    #f8fafc;
+}
+
+
+
+.map-marker {
+
+    position:absolute;
+
+    width:18px;
+
+    height:18px;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+}
+
+
+
+.map-marker.danger {
+
+    background:#dc2626;
+
+}
+
+
+
+.map-marker.warning {
+
+    background:#f59e0b;
+
+}
+
+
+
+.map-marker.safe {
+
+    background:#16a34a;
+
+}
 /* ==========================================
    End of SentinelLink Design System
 ========================================== */
