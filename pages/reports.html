@@ -1,540 +1,923 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SentinelLink | Reports Management</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="../css/style.css" rel="stylesheet"/>
-<style>
 
-- {
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Inter,sans-serif;
-}
+<meta charset="UTF-8">
 
-:root{
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-- -panel:rgba(15,23,42,.82);
---border:rgba(255,255,255,.08);
-- -blue:#3b82f6;
---green:#22c55e;
---orange:#f59e0b;
---red:#ef4444;
---purple:#8b5cf6;
-- -text:#f8fafc;
---muted:#94a3b8;
 
-}
+<title>
+Reports Management | SentinelLink Beta
+</title>
 
-body{
 
-background:
-radial-gradient(circle at top left,#2563eb33,transparent 35%),
-radial-gradient(circle at top right,#22c55e22,transparent 30%),
-linear-gradient(#07111f,#0b1220);
+<meta name="description"
+content="Manage emergency incidents in SentinelLink.">
 
-color:var(--text);
-min-height:100vh;
 
-}
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
 
-.container{
 
-max-width:1450px;
-margin:auto;
-padding:18px;
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
 
-}
 
-header{
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+rel="stylesheet">
 
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:18px;
 
-background:var(--panel);
-border:1px solid var(--border);
-border-radius:20px;
-backdrop-filter:blur(15px);
+<link rel="stylesheet"
+href="../css/style.css">
 
-margin-bottom:20px;
 
-}
-
-.logo{
-
-display:flex;
-gap:14px;
-align-items:center;
-
-}
-
-.icon{
-
-width:50px;
-height:50px;
-border-radius:15px;
-
-display:grid;
-place-items:center;
-
-background:linear-gradient(135deg,#3b82f6,#22c55e);
-
-font-size:20px;
-font-weight:800;
-
-}
-
-.badges{
-
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-
-}
-
-.badge{
-
-padding:8px 14px;
-border-radius:999px;
-
-background:#ffffff08;
-border:1px solid var(--border);
-
-font-size:.85rem;
-color:var(--muted);
-
-}
-
-.live{
-
-background:#22c55e22;
-color:#bbf7d0;
-
-}
-
-.panel{
-
-background:var(--panel);
-border:1px solid var(--border);
-
-border-radius:20px;
-
-padding:20px;
-
-margin-bottom:18px;
-
-}
-
-.topBar{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:15px;
-flex-wrap:wrap;
-
-margin-bottom:18px;
-
-}
-
-.search{
-
-flex:1;
-min-width:260px;
-
-padding:13px;
-
-border:none;
-outline:none;
-
-background:#0f172a;
-
-color:white;
-
-border-radius:12px;
-
-}
-
-button{
-
-padding:11px 18px;
-border:none;
-border-radius:12px;
-cursor:pointer;
-font-weight:700;
-
-}
-
-.primary{
-
-background:#3b82f6;
-color:white;
-
-}
-
-.secondary{
-
-background:#1e293b;
-color:white;
-
-}
-
-.filters{
-
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-
-margin-bottom:18px;
-
-}
-
-.filter{
-
-padding:9px 15px;
-
-background:#ffffff08;
-
-border-radius:999px;
-
-border:1px solid rgba(255,255,255,.08);
-
-font-size:.85rem;
-
-cursor:pointer;
-
-transition:.25s;
-
-}
-
-.filter:hover{
-
-background:#3b82f622;
-
-}
-
-table{
-
-width:100%;
-
-border-collapse:collapse;
-
-}
-
-th{
-
-text-align:left;
-
-padding:14px;
-
-background:#ffffff08;
-
-}
-
-td{
-
-padding:14px;
-
-border-top:1px solid rgba(255,255,255,.05);
-
-}
-
-.status{
-
-display:inline-block;
-
-padding:6px 12px;
-
-border-radius:999px;
-
-font-size:.8rem;
-
-}
-
-.pending{
-
-background:#f59e0b22;
-color:#fde68a;
-
-}
-
-.progress{
-
-background:#3b82f622;
-color:#bfdbfe;
-
-}
-
-.resolved{
-
-background:#22c55e22;
-color:#bbf7d0;
-
-}
-
-.high{
-
-background:#ef444422;
-color:#fecaca;
-
-}
-
-.medium{
-
-background:#f59e0b22;
-color:#fde68a;
-
-}
-
-.low{
-
-background:#22c55e22;
-color:#bbf7d0;
-
-}
-
-.action{
-
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-
-}
-
-.small{
-
-padding:8px 12px;
-font-size:.8rem;
-
-}
-
-@media(max-width:900px){
-
-table{
-
-display:block;
-overflow-x:auto;
-
-}
-
-.topBar{
-
-flex-direction:column;
-align-items:stretch;
-
-}
-
-}
-
-</style>
 </head>
+
+
+
 <body>
-<div class="container">
-<header>
-<div class="logo">
-<div class="icon">
+
+
+
+<header class="navbar">
+
+
+<div class="container nav-container">
+
+
+
+<a href="index.html"
+class="logo">
+
+
+<div class="logo-icon">
 
 SL
 
 </div>
-<div>
-<h2>Reports Management</h2>
-<p style="color:#94a3b8">
 
-Manage citizen and emergency incident reports
 
-</p>
-</div>
-</div>
-<div class="badges">
-<div class="badge live">
+<div class="logo-text">
 
-● Live Feed
+<h1>
+SentinelLink Beta
+</h1>
+
+<span>
+Incident Management
+</span>
 
 </div>
-<div class="badge">
 
-148 Reports
+
+</a>
+
+
+
+
+<nav>
+
+<ul class="nav-links">
+
+
+<li>
+<a href="index.html">
+Home
+</a>
+</li>
+
+
+<li>
+<a href="dashboard.html">
+Dashboard
+</a>
+</li>
+
+
+<li>
+<a href="report.html">
+Report
+</a>
+</li>
+
+
+<li>
+<a class="active"
+href="reports.html">
+Reports
+</a>
+</li>
+
+
+<li>
+<a href="analytics.html">
+Analytics
+</a>
+</li>
+
+
+</ul>
+
+</nav>
+
+
+<button
+onclick="logout()"
+class="btn btn-secondary">
+
+Logout
+
+</button>
+
+
 
 </div>
-<div class="badge">
 
-12 Pending
 
-</div>
-</div>
 </header>
-<div class="panel">
-<div class="topBar">
-<input class="search" id="searchReports" placeholder="Search by ID, location, category or reporter..."/>
-<div style="display:flex;gap:10px;flex-wrap:wrap;">
-<button class="secondary">
 
-Refresh
 
-</button>
-<button class="primary">
 
-Export CSV
 
-</button>
+
+
+<main>
+
+
+
+<section class="hero">
+
+
+<div class="container">
+
+
+
+<div class="section-heading"
+style="text-align:left;">
+
+
+<h2>
+Incident Management
+</h2>
+
+
+<p>
+Review, update and manage all reported emergencies.
+</p>
+
+
 </div>
+
+
+
+
+<div class="form-card">
+
+
+<!-- Search and Filters -->
+
+
+<div class="search-box">
+
+
+<input
+
+type="text"
+
+id="searchReports"
+
+placeholder="Search by ID, type, location...">
+
+
 </div>
-<div class="filters">
-<div class="filter">
-All
+
+
+
+<div class="feature-grid">
+
+
+<div class="form-group">
+
+
+<label for="statusFilter">
+
+Status Filter
+
+</label>
+
+
+<select id="statusFilter">
+
+
+<option value="all">
+
+All Status
+
+</option>
+
+
+<option value="Pending">
+
+Pending
+
+</option>
+
+
+<option value="Active">
+
+Active
+
+</option>
+
+
+<option value="Resolved">
+
+Resolved
+
+</option>
+
+
+</select>
+
+
 </div>
-<div class="filter">
-Railway
+
+
+
+
+
+<div class="form-group">
+
+
+<label for="priorityFilter">
+
+Priority Filter
+
+</label>
+
+
+<select id="priorityFilter">
+
+
+<option value="all">
+
+All Priority
+
+</option>
+
+
+<option value="Critical">
+
+Critical
+
+</option>
+
+
+<option value="High">
+
+High
+
+</option>
+
+
+<option value="Medium">
+
+Medium
+
+</option>
+
+
+<option value="Low">
+
+Low
+
+</option>
+
+
+</select>
+
+
 </div>
-<div class="filter">
-Flood
+
+
 </div>
-<div class="filter">
-Fire
-</div>
-<div class="filter">
-Medical
-</div>
-<div class="filter">
-Crime
-</div>
-<div class="filter">
-Other
-</div>
-</div>
+
+
+
+
+
+<!-- Reports Management Table -->
+
+
+<div class="table-wrapper">
+
+
 <table>
+
+
+<thead>
+
+
 <tr>
-<th>ID</th>
-<th>Category</th>
-<th>Location</th>
-<th>Priority</th>
-<th>Status</th>
-<th>Assigned To</th>
-<th>Actions</th>
+
+
+<th>
+ID
+</th>
+
+
+<th>
+Reporter
+</th>
+
+
+<th>
+Type
+</th>
+
+
+<th>
+Priority
+</th>
+
+
+<th>
+Location
+</th>
+
+
+<th>
+Status
+</th>
+
+
+<th>
+Actions
+</th>
+
+
 </tr>
 
 
+</thead>
 
 
 
 
-<tbody id="reportsTableBody"></tbody></table>
+
+<tbody id="reportsTable">
+
+
+<tr>
+
+
+<td colspan="7">
+
+Loading reports...
+
+</td>
+
+
+</tr>
+
+
+</tbody>
+
+
+
+</table>
+
+
+
 </div>
-<div style="
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-gap:18px;
-margin-bottom:18px;
-">
-<div class="panel">
-<h3>Total Reports</h3>
-<h1 style="margin-top:12px;color:#3b82f6;">
-148
-</h1>
-<p style="margin-top:10px;color:#94a3b8;">
-Reports received this month
+
+
+
+</div>
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- Admin Information -->
+
+
+<section>
+
+
+<div class="container">
+
+
+<div class="form-card">
+
+
+<div class="section-heading"
+style="text-align:left;margin-bottom:20px;">
+
+
+<h2>
+Management Controls
+</h2>
+
+
+<p>
+Update incident progress and maintain emergency records.
 </p>
-</div>
-<div class="panel">
-<h3>Pending Review</h3>
-<h1 style="margin-top:12px;color:#f59e0b;">
-12
-</h1>
-<p style="margin-top:10px;color:#94a3b8;">
-Awaiting administrator approval
-</p>
-</div>
-<div class="panel">
-<h3>Resolved Cases</h3>
-<h1 style="margin-top:12px;color:#22c55e;">
-127
-</h1>
-<p style="margin-top:10px;color:#94a3b8;">
-Successfully completed
-</p>
-</div>
-<div class="panel">
-<h3>Critical Alerts</h3>
-<h1 style="margin-top:12px;color:#ef4444;">
-9
-</h1>
-<p style="margin-top:10px;color:#94a3b8;">
-Immediate action required
-</p>
-</div>
-</div>
-<div class="panel">
-<h3>Recent Activity</h3>
-<div style="display:flex;flex-direction:column;gap:14px;">
-<div style="padding:14px;border-radius:14px;background:#ffffff05;">
-✅ Railway report <b>#1001</b> assigned to <b>Team Alpha</b>.
-</div>
-<div style="padding:14px;border-radius:14px;background:#ffffff05;">
-🌊 Flood report <b>#1002</b> updated by <b>Team Bravo</b>.
-</div>
-<div style="padding:14px;border-radius:14px;background:#ffffff05;">
-🚑 Medical report <b>#1003</b> marked as <b>Resolved</b>.
-</div>
-<div style="padding:14px;border-radius:14px;background:#ffffff05;">
-🔥 Fire incident <b>#1004</b> escalated to Fire Unit 2.
-</div>
-</div>
-</div>
-<div class="panel">
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:15px;
-">
-<p style="color:#94a3b8;">
 
-Showing 1–6 of 148 reports
 
-</p>
-<div style="display:flex;gap:8px;">
-<button class="secondary small">
-◀ Prev
-</button>
-<button class="primary small">
-1
-</button>
-<button class="secondary small">
-2
-</button>
-<button class="secondary small">
-3
-</button>
-<button class="secondary small">
-Next ▶
-</button>
 </div>
-</div>
-</div>
-<footer style="
-margin-top:20px;
-padding:18px;
-text-align:center;
-color:#94a3b8;
-background:rgba(15,23,42,.82);
-border:1px solid rgba(255,255,255,.08);
-border-radius:20px;
-">
 
-SentinelLink Reports Management • National Public Safety Platform • Jigyasa 2026 Prototype
 
-</footer>
+
+
+<div class="status-list">
+
+
+<div class="status-item">
+
+
+<span>
+Access Level
+</span>
+
+
+<strong>
+Administrator
+</strong>
+
+
 </div>
-<script defer="" src="../js/app.js"></script>
+
+
+
+<div class="status-item">
+
+
+<span>
+Database
+</span>
+
+
+<strong>
+Local Storage
+</strong>
+
+
+</div>
+
+
+
+<div class="status-item">
+
+
+<span>
+Sync Mode
+</span>
+
+
+<strong>
+Manual Update
+</strong>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+</section>
+
+<script src="../js/app.js"></script>
+
+
+<script>
+
+
+// Protect admin page
+
+requireLogin();
+
+
+
+
+// Elements
+
+const reportsTable =
+    document.getElementById(
+        "reportsTable"
+    );
+
+
+const searchInput =
+    document.getElementById(
+        "searchReports"
+    );
+
+
+const statusFilter =
+    document.getElementById(
+        "statusFilter"
+    );
+
+
+const priorityFilter =
+    document.getElementById(
+        "priorityFilter"
+    );
+
+
+
+
+
+// Current report list
+
+let currentReports = [];
+
+
+
+
+
+// Load reports
+
+function loadReports(){
+
+
+    currentReports =
+        getReports();
+
+
+
+    renderReports(
+        currentReports
+    );
+
+
+}
+
+
+
+
+
+// Render table
+
+function renderReports(reports){
+
+
+    if(reports.length === 0){
+
+
+        reportsTable.innerHTML =
+
+        `
+        <tr>
+
+        <td colspan="7">
+
+        No reports found.
+
+        </td>
+
+        </tr>
+        `;
+
+
+        return;
+
+    }
+
+
+
+
+
+    reportsTable.innerHTML = "";
+
+
+
+
+
+    reports.forEach(report => {
+
+
+
+        const row =
+        document.createElement("tr");
+
+
+
+        row.innerHTML =
+
+        `
+
+        <td>
+        ${report.id}
+        </td>
+
+
+        <td>
+        ${report.reporter}
+        </td>
+
+
+        <td>
+        ${report.type}
+        </td>
+
+
+        <td>
+
+        <span class="badge-${getPriorityClass(report.priority)}">
+
+        ${report.priority}
+
+        </span>
+
+        </td>
+
+
+        <td>
+        ${report.location}
+        </td>
+
+
+        <td>
+
+
+        <select
+        onchange="changeStatus('${report.id}',this.value)">
+
+
+        <option
+        ${report.status==="Pending"?"selected":""}>
+        Pending
+        </option>
+
+
+        <option
+        ${report.status==="Active"?"selected":""}>
+        Active
+        </option>
+
+
+        <option
+        ${report.status==="Resolved"?"selected":""}>
+        Resolved
+        </option>
+
+
+        </select>
+
+
+        </td>
+
+
+        <td>
+
+
+        <button
+
+        class="btn btn-secondary"
+
+        onclick="removeReport('${report.id}')">
+
+        Delete
+
+        </button>
+
+
+        </td>
+
+
+        `;
+
+
+
+        reportsTable.appendChild(row);
+
+
+
+    });
+
+
+}
+
+
+
+
+
+// Search + Filter
+
+function filterReports(){
+
+
+
+    const searchValue =
+        searchInput.value
+        .toLowerCase();
+
+
+
+    const statusValue =
+        statusFilter.value;
+
+
+
+    const priorityValue =
+        priorityFilter.value;
+
+
+
+
+
+    const filtered =
+
+    currentReports.filter(report => {
+
+
+
+        const matchesSearch =
+
+        report.id.toLowerCase()
+        .includes(searchValue)
+
+        ||
+
+        report.type.toLowerCase()
+        .includes(searchValue)
+
+        ||
+
+        report.location.toLowerCase()
+        .includes(searchValue);
+
+
+
+
+
+        const matchesStatus =
+
+        statusValue === "all"
+
+        ||
+
+        report.status === statusValue;
+
+
+
+
+
+        const matchesPriority =
+
+        priorityValue === "all"
+
+        ||
+
+        report.priority === priorityValue;
+
+
+
+
+
+        return
+
+        matchesSearch
+
+        &&
+
+        matchesStatus
+
+        &&
+
+        matchesPriority;
+
+
+
+    });
+
+
+
+
+
+    renderReports(filtered);
+
+
+
+}
+
+
+
+
+
+// Change status
+
+function changeStatus(id,status){
+
+
+    updateReportStatus(
+        id,
+        status
+    );
+
+
+    loadReports();
+
+
+}
+
+
+
+
+
+// Delete report
+
+function removeReport(id){
+
+
+
+    const confirmDelete =
+
+    confirm(
+        "Delete this incident report?"
+    );
+
+
+
+    if(confirmDelete){
+
+
+        deleteReport(id);
+
+
+        loadReports();
+
+
+    }
+
+
+}
+
+
+
+
+
+// Startup
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+
+    loadReports();
+
+
+    searchInput.addEventListener(
+        "input",
+        filterReports
+    );
+
+
+    statusFilter.addEventListener(
+        "change",
+        filterReports
+    );
+
+
+    priorityFilter.addEventListener(
+        "change",
+        filterReports
+    );
+
+
+});
+
+
+
+</script>
+
+
+
+</main>
+
+
 </body>
+
 </html>
