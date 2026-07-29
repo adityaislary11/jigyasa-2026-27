@@ -1363,3 +1363,438 @@ small{
 
 
 }
+
+/* ==========================
+   RESPONSIVE DESIGN
+========================== */
+
+
+
+@media(max-width:1100px){
+
+
+
+    .dashboard-grid{
+
+
+        grid-template-columns:
+
+        repeat(2,1fr);
+
+
+    }
+
+
+
+
+    .feature-grid{
+
+
+        grid-template-columns:
+
+        repeat(2,1fr);
+
+
+    }
+
+
+
+
+    .map-layout{
+
+
+        grid-template-columns:
+
+        1fr;
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+@media(max-width:768px){
+
+
+
+    .container{
+
+
+        width:92%;
+
+
+    }
+
+
+
+
+
+    .nav-container{
+
+
+        flex-direction:column;
+
+
+        gap:15px;
+
+
+    }
+
+
+
+
+
+    .nav-links{
+
+
+        flex-wrap:wrap;
+
+
+        justify-content:center;
+
+
+        gap:15px;
+
+
+    }
+
+
+
+
+
+    .hero{
+
+
+        padding:35px 0;
+
+
+    }
+
+
+
+
+
+    .section-heading h2{
+
+
+        font-size:26px;
+
+
+    }
+
+
+
+
+
+    .dashboard-grid{
+
+
+        grid-template-columns:
+
+        1fr;
+
+
+    }
+
+
+
+
+
+    .feature-grid{
+
+
+        grid-template-columns:
+
+        1fr;
+
+
+    }
+
+
+
+
+
+    .form-card{
+
+
+        padding:20px;
+
+
+    }
+
+
+
+
+
+    .map-container{
+
+
+        height:320px;
+
+
+    }
+
+
+
+
+}
+
+
+
+
+
+
+
+@media(max-width:480px){
+
+
+
+    body{
+
+
+        font-size:14px;
+
+
+    }
+
+
+
+
+    .logo-text h1{
+
+
+        font-size:16px;
+
+
+    }
+
+
+
+
+
+    .btn{
+
+
+        width:100%;
+
+
+    }
+
+
+
+
+
+    .status-item{
+
+
+        flex-direction:column;
+
+
+        align-items:flex-start;
+
+
+        gap:8px;
+
+
+    }
+
+
+
+
+
+}
+
+
+
+
+
+
+
+/* ==========================
+   ANIMATIONS
+========================== */
+
+
+
+.form-card,
+
+
+.dashboard-card,
+
+
+.feature-card{
+
+
+    animation:
+
+    fadeIn .3s ease;
+
+
+}
+
+
+
+
+
+@keyframes fadeIn{
+
+
+    from{
+
+
+        opacity:0;
+
+
+        transform:translateY(8px);
+
+
+    }
+
+
+
+    to{
+
+
+        opacity:1;
+
+
+        transform:translateY(0);
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+/* ==========================
+   UTILITY CLASSES
+========================== */
+
+
+
+.text-center{
+
+
+    text-align:center;
+
+
+}
+
+
+
+
+
+.text-muted{
+
+
+    color:var(--muted);
+
+
+}
+
+
+
+
+
+.mt-20{
+
+
+    margin-top:20px;
+
+
+}
+
+
+
+
+
+.mb-20{
+
+
+    margin-bottom:20px;
+
+
+}
+
+
+
+
+
+
+
+.hidden{
+
+
+    display:none;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================
+   PRINT MODE
+========================== */
+
+
+
+@media print{
+
+
+
+    .navbar,
+
+
+    .btn{
+
+
+        display:none;
+
+
+    }
+
+
+
+
+    body{
+
+
+        background:white;
+
+
+    }
+
+
+
+
+
+    .form-card,
+
+
+    .dashboard-card{
+
+
+        box-shadow:none;
+
+
+    }
+
+
+}
