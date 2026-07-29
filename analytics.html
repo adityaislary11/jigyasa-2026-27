@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="#0f172a" name="theme-color"/>
+<title>SentinelLink | Analytics</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root { --panel: rgba(15,23,42,0.86); --line: rgba(148,163,184,0.18); --text:#e5eefb; --muted:#94a3b8; --accent:#60a5fa; --accent-2:#22c55e; --warn:#f59e0b; --danger:#ef4444; --shadow:0 20px 60px rgba(0,0,0,0.35); }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);background:radial-gradient(circle at top left, rgba(37,99,235,0.30), transparent 36%),radial-gradient(circle at top right, rgba(34,197,94,0.16), transparent 28%),linear-gradient(180deg,#07111f 0%,#0b1220 100%);min-height:100vh}
+    .app{max-width:1360px;margin:0 auto;padding:18px}
+    .topbar,.panel{border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,var(--panel),rgba(15,23,42,0.56));box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+    .topbar{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;position:sticky;top:16px;z-index:20}
+    .brand{display:flex;gap:14px;align-items:center}.logo{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#60a5fa,#22c55e);color:#fff;font-weight:800}
+    .brand h1{margin:0;font-size:1.05rem;line-height:1.1}.brand p,.muted{color:var(--muted)}.brand p{margin:4px 0 0;font-size:0.88rem}
+    .status{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.pill{padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,0.03);color:var(--muted);font-size:0.88rem}.pill.live{color:#bbf7d0;background:rgba(34,197,94,0.10);border-color:rgba(34,197,94,0.24)}
+    .layout{display:grid;grid-template-columns:1fr 0.9fr;gap:18px;margin-top:18px}.panel{padding:18px} h2,h3,h4{margin:0} h2{font-size:clamp(1.5rem,3vw,2.2rem);letter-spacing:-0.04em}
+    .subtitle{margin:10px 0 0;color:var(--muted);line-height:1.7}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:16px 0}.metric{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,0.03)}.metric strong{display:block;font-size:1.25rem;margin-bottom:6px}.metric span{color:var(--muted);font-size:0.88rem}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.box{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,0.03);padding:16px;min-height:180px}.box-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.tag{padding:7px 11px;border-radius:999px;font-size:0.8rem;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,0.03)}
+    .chart{height:220px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:16px;display:flex;align-items:end;gap:12px}.bar{flex:1;border-radius:14px 14px 6px 6px;background:linear-gradient(180deg,#60a5fa,#38bdf8);min-height:20%}.bar.green{background:linear-gradient(180deg,#22c55e,#4ade80)}.bar.orange{background:linear-gradient(180deg,#f59e0b,#fbbf24)}.bar.red{background:linear-gradient(180deg,#ef4444,#fb7185)}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.legend span{padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,0.03);font-size:0.82rem;color:var(--muted)}
+    .list{display:grid;gap:10px}.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid var(--line)} .dot{width:12px;height:12px;border-radius:50%}.dot.red{background:var(--danger)}.dot.orange{background:var(--warn)}.dot.green{background:var(--accent-2)}.item p{margin:4px 0 0;color:var(--muted);font-size:0.86rem}.chip{font-size:0.82rem;padding:7px 10px;border-radius:999px;border:1px solid var(--line);color:#dbeafe}
+    .summary{display:grid;gap:14px}.summary .panel{padding:16px}.progress{height:10px;border-radius:999px;background:rgba(255,255,255,0.06);overflow:hidden;margin-top:10px}.barfill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#60a5fa,#22c55e)}
+    .foot{margin-top:14px;color:var(--muted);font-size:0.84rem;text-align:center}
+    @media (max-width:1040px){.layout{grid-template-columns:1fr}.metrics,.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:680px){.app{padding:12px}.topbar,.panel{border-radius:20px}.metrics,.grid-2{grid-template-columns:1fr}.status{justify-content:flex-start}}
+  </style>
+<link href="../css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<nav>
+<a href="index.html">Home</a>
+<a href="dashboard.html">Dashboard</a>
+<a href="report.html">Report Incident</a>
+<a href="map.html">Map</a>
+<a href="analytics.html">Analytics</a>
+<a href="settings.html">Settings</a>
+</nav>
+<main class="app">
+<header class="topbar">
+<div class="brand"><div class="logo">SL</div><div><h1>SentinelLink</h1><p>Response analytics and performance insights</p></div></div>
+<div class="status"><span class="pill live">● Analytics active</span><span class="pill">Reports: 128</span><span class="pill">Avg response: 12 min</span></div>
+</header>
+<section class="layout">
+<div class="panel">
+<h2>Operational analytics</h2>
+<p class="subtitle">This page summarises incidents, response speed, and module performance for public safety planning.</p>
+<div class="metrics">
+<div class="metric"><strong id="analyticsTotal">128</strong><span>reports processed</span></div>
+<div class="metric"><strong id="analyticsResolved">92%</strong><span>resolved on first response</span></div>
+<div class="metric"><strong id="analyticsResponseTime">12 min</strong><span>average response time</span></div>
+<div class="metric"><strong id="analyticsActive">05</strong><span>active shelter zones</span></div>
+</div>
+<div class="grid-2">
+<div class="box">
+<div class="box-head"><h3>Incident trends</h3><span class="tag">Last 7 days</span></div>
+<div aria-label="bar chart" class="chart">
+<div class="bar" style="height:34%"></div>
+<div class="bar green" style="height:52%"></div>
+<div class="bar orange" style="height:44%"></div>
+<div class="bar red" style="height:74%"></div>
+<div class="bar" style="height:61%"></div>
+<div class="bar green" style="height:40%"></div>
+<div class="bar orange" style="height:58%"></div>
+</div>
+<div class="legend"><span>Citizen SOS</span><span>Railway safety</span><span>Flood alerts</span><span>Landslide alerts</span></div>
+</div>
+<div class="box">
+<div class="box-head"><h3>Performance snapshot</h3><span class="tag">Live</span></div>
+<div class="list">
+<div class="item"><span class="dot green"></span><div><strong>Citizen reporting</strong><p>Fastest growing input source</p></div><span class="chip">90%</span></div>
+<div class="item"><span class="dot orange"></span><div><strong>Railway incidents</strong><p>Moderate but high priority</p></div><span class="chip">78%</span></div>
+<div class="item"><span class="dot red"></span><div><strong>Disaster zones</strong><p>Highest risk on current map</p></div><span class="chip">Critical</span></div>
+</div>
+</div>
+</div>
+</div>
+<aside class="summary">
+<div class="panel">
+<div class="box-head"><h3>Response efficiency</h3><span class="tag">Overall</span></div>
+<strong>Strong</strong>
+<p class="muted">Most incidents are acknowledged quickly, and response teams are assigned with minimal delay.</p>
+<div class="progress"><div class="barfill" style="width:84%"></div></div>
+</div>
+<div class="panel">
+<div class="box-head"><h3>Risk outlook</h3><span class="tag">Forecast</span></div>
+<div class="list">
+<div class="item"><span class="dot orange"></span><div><strong>Flood probability</strong><p>Rising due to rainfall intensity</p></div><span class="chip">Medium</span></div>
+<div class="item"><span class="dot green"></span><div><strong>Railway safety</strong><p>Stable except one flagged crossing</p></div><span class="chip">Low</span></div>
+<div class="item"><span class="dot red"></span><div><strong>Community alerts</strong><p>High urgency in two wards</p></div><span class="chip">High</span></div>
+</div>
+</div>
+<div class="panel">
+<div class="box-head"><h3>Export</h3><span class="tag">Reports</span></div>
+<div class="list">
+<div class="item"><span>Weekly PDF</span><span class="chip">Generate</span></div>
+<div class="item"><span>CSV summary</span><span class="chip">Download</span></div>
+</div>
+</div>
+</aside>
+</section>
+<p class="foot">SentinelLink analytics • designed for operational review and public safety planning</p>
+</main>
+<script defer="" src="../js/app.js"></script>
+<script src="../js/analytics.js"></script>
+</body>
+</html>
